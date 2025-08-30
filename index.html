@@ -35,13 +35,98 @@
   </div>
 
   <script>
-    // List of songs with optional images
-    const songs = [
-      { title: "Song A", img: "https://via.placeholder.com/300x200?text=Song+A" },
-      { title: "Song B", img: "https://via.placeholder.com/300x200?text=Song+B" },
-      { title: "Song C", img: "https://via.placeholder.com/300x200?text=Song+C" },
-      { title: "Song D", img: "https://via.placeholder.com/300x200?text=Song+D" },
-    ];
+// List of songs with optional images
+const songs = [
+  // Individual songs with their own images
+  { name: "Ghost", image: "images/Ghost.jpeg" },
+  { name: "Voc Pop", image: "images/Voc Pop.jpeg" },
+  { name: "Only If You Want It", image: "images/Only If You Want It.jpeg" },
+  { name: "The Girls", image: "images/The Girls.jpeg" },
+  { name: "Money Lover", image: "images/Money Lover.jpeg" },
+  { name: "Push Me Away", image: "images/Push Me Away.jpeg" },
+  { name: "Set Me Off", image: "images/Set Me Off.jpeg" },
+  { name: "Waking Up", image: "images/Waking Up.jpeg" },
+  { name: "#wastehistime", image: "images/#wastehistime.jpeg" },
+  { name: "Head Over Heels", image: "images/Head Over Heels.jpeg" },
+  { name: "Drive Alone", image: "images/Drive Alone.jpeg" },
+  { name: "Move Slow", image: "images/Move Slow.jpeg" },
+  { name: "Neon", image: "images/Neon.jpeg" },
+  { name: "Redbone", image: "images/Redbone.jpeg" },
+  { name: "Mine", image: "images/Mine.jpeg" },
+  { name: "Airplane", image: "images/Airplane.jpeg" },
+  { name: "Killshot", image: "images/Killshot.jpeg" },
+  { name: "Good Intentions", image: "images/Good Intentions.jpeg" },
+  { name: "Venice", image: "images/Venice.jpeg" },
+  { name: "Oh Hell", image: "images/Oh Hell.jpeg" },
+  { name: "How to Get Physical", image: "images/How to Get Physical.jpeg" },
+  { name: "Hideaway", image: "images/Hideaway.jpeg" },
+  { name: "Sky2Fall", image: "images/Sky2Fall.jpeg" },
+  { name: "Woww", image: "images/Woww.jpeg" },
+  { name: "Live 4ever", image: "images/Live 4ever.jpeg" },
+  { name: "You Lose!", image: "images/You Lose!.jpeg" },
+  { name: "Secrets (Your Fire)", image: "images/Secrets (Your Fire).jpeg" },
+  { name: "Chaeri", image: "images/Chaeri.jpeg" },
+  { name: "Death & Romance", image: "images/Death & Romance.jpeg" },
+  { name: "Tunnel Vision", image: "images/Tunnel Vision.jpeg" },
+  { name: "Image", image: "images/Image.jpeg" },
+
+  // mini mix, vol. 1 (all share the same cover)
+  { name: "U Wanna Dance?", image: "images/mini mix, vol. 1.jpeg" },
+  { name: "Nothing Baby", image: "images/mini mix, vol. 1.jpeg" },
+  { name: "El Dorado", image: "images/mini mix, vol. 1.jpeg" },
+  { name: "Afternoon in Heaven", image: "images/mini mix, vol. 1.jpeg" },
+  { name: "Turning Off the Rain", image: "images/mini mix, vol. 1.jpeg" },
+  { name: "Intro", image: "images/mini mix, vol. 1.jpeg" },
+
+  // A Little Rhythm and a Wicked Feeling
+  { name: "Stop & Go", image: "images/A Little Rhythm and a Wicked Feeling.jpeg" },
+  { name: "Story", image: "images/A Little Rhythm and a Wicked Feeling.jpeg" },
+
+  // mini mix, vol. 2
+  { name: "I Don’t Want to Cry Anymore", image: "images/mini mix, vol. 2.jpeg" },
+  { name: "Body", image: "images/mini mix, vol. 2.jpeg" },
+  { name: "Sky2Fall (Reprise)", image: "images/mini mix, vol. 2.jpeg" },
+
+  // mini mix, vol. 3
+  { name: "Top Dog", image: "images/mini mix, vol. 3.jpeg" },
+  { name: "EXO", image: "images/mini mix, vol. 3.jpeg" },
+  { name: "2 Wheel Drive", image: "images/mini mix, vol. 3.jpeg" },
+  { name: "Wandering Eyes", image: "images/mini mix, vol. 3.jpeg" },
+  { name: "Slug Song (Reprise)", image: "images/mini mix, vol. 3.jpeg" },
+  { name: "Slug Song", image: "images/mini mix, vol. 3.jpeg" },
+  { name: "Tonguetwister", image: "images/mini mix, vol. 3.jpeg" },
+
+  // Mercurial World
+  { name: "Domino", image: "images/Mercurial World.jpeg" },
+  { name: "Hysterical Us", image: "images/Mercurial World.jpeg" },
+  { name: "Dreamcatching", image: "images/Mercurial World.jpeg" },
+  { name: "Dawning of the Season", image: "images/Mercurial World.jpeg" },
+  { name: "Follow the Leader", image: "images/Mercurial World.jpeg" },
+  { name: "Halfway", image: "images/Mercurial World.jpeg" },
+  { name: "The Beginning", image: "images/Mercurial World.jpeg" },
+  { name: "Mercurial World", image: "images/Mercurial World.jpeg" },
+  { name: "Something for 2", image: "images/Mercurial World.jpeg" },
+  { name: "Prophecy", image: "images/Mercurial World.jpeg" },
+  { name: "The End", image: "images/Mercurial World.jpeg" },
+
+  // Mercurial World (Deluxe)
+  { name: "Unconditional", image: "images/Mercurial World (Deluxe).jpeg" },
+  { name: "All You Do", image: "images/Mercurial World (Deluxe).jpeg" },
+
+  // Imaginal Disk
+  { name: "Angel on a Satellite", image: "images/Imaginal Disk.jpeg" },
+  { name: "Fear, Sex", image: "images/Imaginal Disk.jpeg" },
+  { name: "The Ballad of Matt & Mica", image: "images/Imaginal Disk.jpeg" },
+  { name: "Watching T.V.", image: "images/Imaginal Disk.jpeg" },
+  { name: "Cry for Me", image: "images/Imaginal Disk.jpeg" },
+  { name: "Killing Time", image: "images/Imaginal Disk.jpeg" },
+  { name: "She Looked Like Me!", image: "images/Imaginal Disk.jpeg" },
+  { name: "That’s My Floor", image: "images/Imaginal Disk.jpeg" },
+  { name: "Love is Everywhere", image: "images/Imaginal Disk.jpeg" },
+  { name: "Vampire in the Corner", image: "images/Imaginal Disk.jpeg" },
+  { name: "Feeling DiskInserted?", image: "images/Imaginal Disk.jpeg" },
+  { name: "True Blue Interlude", image: "images/Imaginal Disk.jpeg" },
+];
 
     let comparisons = [];
     let results = [];
