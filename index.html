@@ -4,7 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Song Sorter</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .song {
+      width: 600px;
+      height: 600px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .song img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; /* shows full image without cropping */
+    }
+  </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
 
