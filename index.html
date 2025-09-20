@@ -159,28 +159,86 @@
     { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
 
- // ---- Merge Sort With User Input ----
-function startSorter() {
-  mergeSortUI(songs.slice()).then(finalRanking => {
-    showResult(finalRanking);
+/* --- helper: shuffle array in-place --- */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/* --- UI helpers: show a pair and wire the left/right buttons to callbacks --- */
+function showPair(songL, songR, chooseL, chooseR) {
+  const leftNameEl = document.getElementById("left");
+  const rightNameEl = document.getElementById("right");
+  const leftImgEl = document.getElementById("left-img");
+  const rightImgEl = document.getElementById("right-img");
+
+  leftNameEl.textContent = songL.name;
+  rightNameEl.textContent = songR.name;
+
+  if (songL.image) {
+    leftImgEl.src = songL.image;
+    leftImgEl.classList.remove("hidden");
+  } else {
+    leftImgEl.classList.add("hidden");
+  }
+  if (songR.image) {
+    rightImgEl.src = songR.image;
+    rightImgEl.classList.remove("hidden");
+  } else {
+    rightImgEl.classList.add("hidden");
+  }
+
+  // Replace onclick handlers (overrides previous)
+  document.getElementById("choose-left").onclick = () => {
+    // tiny protective debounce to avoid double clicks
+    document.getElementById("choose-left").onclick = null;
+    document.getElementById("choose-right").onclick = null;
+    chooseL();
+  };
+  document.getElementById("choose-right").onclick = () => {
+    document.getElementById("choose-left").onclick = null;
+    document.getElementById("choose-right").onclick = null;
+    chooseR();
+  };
+}
+
+/* --- merge two sorted arrays using user input --- */
+function mergeUI(leftArr, rightArr) {
+  return new Promise(resolve => {
+    const merged = [];
+
+    function step() {
+      // if one side is empty, append remainder and finish
+      if (leftArr.length === 0 || rightArr.length === 0) {
+        resolve(merged.concat(leftArr, rightArr));
+        return;
+      }
+
+      const l = leftArr[0];
+      const r = rightArr[0];
+
+      // show l vs r and wire callbacks
+      showPair(l, r,
+        () => { // choose left: l > r
+          merged.push(leftArr.shift());
+          step();
+        },
+        () => { // choose right: r > l
+          merged.push(rightArr.shift());
+          step();
+        }
+      );
+    }
+
+    // start the interactive merge
+    step();
   });
 }
 
-function showResult(ranking) {
-  document.getElementById("choices").classList.add("hidden");
-  document.getElementById("buttons").classList.add("hidden");
-  const result = document.getElementById("result");
-  result.classList.remove("hidden");
-  const list = document.getElementById("ranking");
-  list.innerHTML = "";
-  ranking.forEach(song => {
-    const li = document.createElement("li");
-    li.textContent = song.name;
-    list.appendChild(li);
-  });
-}
-
-// Merge sort but pause for user decisions
+/* --- recursive merge sort that asks the user only when merging --- */
 async function mergeSortUI(arr) {
   if (arr.length <= 1) return arr;
   const mid = Math.floor(arr.length / 2);
@@ -189,36 +247,39 @@ async function mergeSortUI(arr) {
   return await mergeUI(left, right);
 }
 
-function mergeUI(left, right) {
-  return new Promise(resolve => {
-    const out = [];
-    function next() {
-      if (!left.length || !right.length) {
-        resolve(out.concat(left, right));
-        return;
-      }
-      const l = left[0], r = right[0];
-      showPair(l, r, () => { out.push(l); left.shift(); next(); },
-                       () => { out.push(r); right.shift(); next(); });
-    }
-    next();
+/* --- show final ranking in the result area --- */
+function showResult(finalList) {
+  document.getElementById("choices").classList.add("hidden");
+  document.getElementById("buttons").classList.add("hidden");
+  const resultDiv = document.getElementById("result");
+  resultDiv.classList.remove("hidden");
+
+  const ranking = document.getElementById("ranking");
+  ranking.innerHTML = "";
+  finalList.forEach(song => {
+    const li = document.createElement("li");
+    li.textContent = song.name;
+    ranking.appendChild(li);
   });
 }
 
-function showPair(songL, songR, chooseL, chooseR) {
-  document.getElementById("left").textContent = songL.name;
-  document.getElementById("right").textContent = songR.name;
-  const li = document.getElementById("left-img");
-  const ri = document.getElementById("right-img");
-  li.src = songL.image; ri.src = songR.image;
-  li.classList.remove("hidden");
-  ri.classList.remove("hidden");
-  document.getElementById("choose-left").onclick = chooseL;
-  document.getElementById("choose-right").onclick = chooseR;
+/* --- start the sorter --- */
+async function startSorter() {
+  // clone & shuffle so original songs array isn't mutated
+  const arr = shuffle(songs.slice());
+  const final = await mergeSortUI(arr);
+  showResult(final);
 }
 
-startSorter();
-</script>
+/* Kick it off when the page loads */
+window.addEventListener("load", () => {
+  // small guard: ensure songs array isn't empty
+  if (!Array.isArray(songs) || songs.length === 0) {
+    console.error("Songs array missing or empty.");
+    return;
+  }
+  startSorter();
+});
   </script>
 </body>
 </html>
