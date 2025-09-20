@@ -159,78 +159,66 @@
     { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
 
-  let comparisons = [];
-  let results = [];
+ // ---- Merge Sort With User Input ----
+function startSorter() {
+  mergeSortUI(songs.slice()).then(finalRanking => {
+    showResult(finalRanking);
+  });
+}
 
-  function init() {
-    results = [...songs];
-    for (let i = 0; i < songs.length; i++) {
-      for (let j = i + 1; j < songs.length; j++) {
-        comparisons.push([i, j]);
+function showResult(ranking) {
+  document.getElementById("choices").classList.add("hidden");
+  document.getElementById("buttons").classList.add("hidden");
+  const result = document.getElementById("result");
+  result.classList.remove("hidden");
+  const list = document.getElementById("ranking");
+  list.innerHTML = "";
+  ranking.forEach(song => {
+    const li = document.createElement("li");
+    li.textContent = song.name;
+    list.appendChild(li);
+  });
+}
+
+// Merge sort but pause for user decisions
+async function mergeSortUI(arr) {
+  if (arr.length <= 1) return arr;
+  const mid = Math.floor(arr.length / 2);
+  const left = await mergeSortUI(arr.slice(0, mid));
+  const right = await mergeSortUI(arr.slice(mid));
+  return await mergeUI(left, right);
+}
+
+function mergeUI(left, right) {
+  return new Promise(resolve => {
+    const out = [];
+    function next() {
+      if (!left.length || !right.length) {
+        resolve(out.concat(left, right));
+        return;
       }
+      const l = left[0], r = right[0];
+      showPair(l, r, () => { out.push(l); left.shift(); next(); },
+                       () => { out.push(r); right.shift(); next(); });
     }
-    showNextComparison();
-  }
+    next();
+  });
+}
 
-  function showNextComparison() {
-    if (comparisons.length === 0) {
-      finishGame();
-      return;
-    }
+function showPair(songL, songR, chooseL, chooseR) {
+  document.getElementById("left").textContent = songL.name;
+  document.getElementById("right").textContent = songR.name;
+  const li = document.getElementById("left-img");
+  const ri = document.getElementById("right-img");
+  li.src = songL.image; ri.src = songR.image;
+  li.classList.remove("hidden");
+  ri.classList.remove("hidden");
+  document.getElementById("choose-left").onclick = chooseL;
+  document.getElementById("choose-right").onclick = chooseR;
+}
 
-    const [i, j] = comparisons.shift();
-    const left = songs[i];
-    const right = songs[j];
-
-    document.getElementById("left").textContent = left.name;
-    document.getElementById("right").textContent = right.name;
-
-    const leftImg = document.getElementById("left-img");
-    const rightImg = document.getElementById("right-img");
-
-    if (left.image) {
-      leftImg.src = left.image;
-      leftImg.classList.remove("hidden");
-    } else {
-      leftImg.classList.add("hidden");
-    }
-
-    if (right.image) {
-      rightImg.src = right.image;
-      rightImg.classList.remove("hidden");
-    } else {
-      rightImg.classList.add("hidden");
-    }
-
-    document.getElementById("choose-left").onclick = () => vote(i, j);
-    document.getElementById("choose-right").onclick = () => vote(j, i);
-  }
-
-  function vote(winner, loser) {
-    const wi = results.findIndex(s => s.name === songs[winner].name);
-    const li = results.findIndex(s => s.name === songs[loser].name);
-    if (wi > li) {
-      const [moved] = results.splice(wi, 1);
-      results.splice(li, 0, moved);
-    }
-    showNextComparison();
-  }
-
-  function finishGame() {
-    document.getElementById("choices").classList.add("hidden");
-    document.getElementById("buttons").classList.add("hidden");
-    document.getElementById("result").classList.remove("hidden");
-
-    const ranking = document.getElementById("ranking");
-    ranking.innerHTML = "";
-    results.forEach(song => {
-      const li = document.createElement("li");
-      li.textContent = song.name;
-      ranking.appendChild(li);
-    });
-  }
-
-  init();
+startSorter();
+</script>
   </script>
 </body>
 </html>
