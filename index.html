@@ -183,48 +183,43 @@ const songs = [
   ];
 
 <script>
-let lists = songs.map(song => [song]); // split songs into single-item lists
+let lists = songs.map(song => [song]); // each song in its own list
 let currentMerge = null;
+let currentMergeQueue = [];
 let head1 = 0, head2 = 0;
 let rec = [];
 let numQuestion = 1;
 let finishSize = 0;
 
-// show current battle
+// show the current battle
 function showImage() {
-  document.getElementById('battleNumber').innerHTML = `Battle ${numQuestion}<br>${Math.floor(finishSize / songs.length * 100)}% sorted`;
+  document.getElementById('battleNumber').innerHTML =
+    `Battle ${numQuestion}<br>${Math.floor(finishSize / songs.length * 100)}% sorted`;
   document.getElementById('leftImg').src = currentMerge.left[head1].image;
   document.getElementById('leftName').textContent = currentMerge.left[head1].name;
   document.getElementById('rightImg').src = currentMerge.right[head2].image;
   document.getElementById('rightName').textContent = currentMerge.right[head2].name;
 }
 
-// handle user choice
+// handle a user choice
 function choose(side) {
   const winner = side === 'left' ? currentMerge.left[head1] : currentMerge.right[head2];
   rec.push(winner);
   finishSize++;
   if (side === 'left') head1++; else head2++;
 
-  // copy remaining items if one side is finished
-  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) {
-    rec.push(currentMerge.left[head1++]);
-    finishSize++;
-  }
-  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length) {
-    rec.push(currentMerge.right[head2++]);
-    finishSize++;
-  }
+  // copy remaining if one side finished
+  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) rec.push(currentMerge.left[head1++], finishSize++);
+  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length) rec.push(currentMerge.right[head2++], finishSize++);
 
   // if merge done
   if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
-    currentMerge.merged.push(...rec); // store merged list in placeholder
+    currentMerge.merged.push(...rec);
     rec = [];
     head1 = 0;
     head2 = 0;
     numQuestion++;
 
-    // prepare next merge
     if (currentMergeQueue.length > 0) {
       currentMerge = currentMergeQueue.shift();
       showImage();
@@ -237,9 +232,7 @@ function choose(side) {
   }
 }
 
-// merge queue for current round
-let currentMergeQueue = [];
-
+// prepare the next round of merges
 function prepareNextRound() {
   const newLists = [];
   currentMergeQueue = [];
@@ -252,7 +245,7 @@ function prepareNextRound() {
       currentMergeQueue.push({ left, right, merged: placeholder });
       newLists.push(placeholder);
     } else {
-      newLists.push(left); // odd item moves to next round
+      newLists.push(left); // carry over odd item
     }
   }
 
