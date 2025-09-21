@@ -182,86 +182,86 @@ const songs = [
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
 
-// Merge-sort style tournament
-let lstMember = [[...songs]]; // start with all songs in one list
-let parent = [-1];
-let cmp1 = lstMember.length - 2;
-let cmp2 = lstMember.length - 1;
-let head1 = 0;
-let head2 = 0;
+let mergeQueue = []; // queue of lists to merge
+let currentMerge = null;
+let head1 = 0, head2 = 0;
 let rec = [];
-let nrec = 0;
-let totalSize = 0;
-songs.forEach(() => totalSize++);
-let finishSize = 0;
 let numQuestion = 1;
+let finishSize = 0;
+const totalSize = songs.length;
 
-// Split lists for merge sort
-function splitLists() {
-  let n = 1;
-  for (let i = 0; i < lstMember.length; i++) {
-    if (lstMember[i].length >= 2) {
-      let mid = Math.ceil(lstMember[i].length / 2);
-      let left = lstMember[i].slice(0, mid);
-      let right = lstMember[i].slice(mid);
-      lstMember.push(left);
-      parent.push(i);
-      lstMember.push(right);
-      parent.push(i);
-      n += 2;
-    }
-  }
-  cmp1 = lstMember.length - 2;
-  cmp2 = lstMember.length - 1;
+// recursively split songs into single-song lists
+function splitList(list) {
+  if (list.length <= 1) return [list];
+  const mid = Math.ceil(list.length / 2);
+  return [...splitList(list.slice(0, mid)), ...splitList(list.slice(mid))];
 }
-splitLists();
+
+// initialize merge queue
+let lists = splitList(songs); 
+while (lists.length > 1) {
+  const left = lists.shift();
+  const right = lists.shift();
+  mergeQueue.push({ left, right });
+  lists.push(left.concat(right)); // keep track of merged lists for next rounds
+}
 
 function showImage() {
   document.getElementById('battleNumber').innerHTML = `Battle ${numQuestion}<br>${Math.floor(finishSize/totalSize*100)}% sorted`;
-  document.getElementById('leftImg').src = lstMember[cmp1][head1].image;
-  document.getElementById('leftName').textContent = lstMember[cmp1][head1].name;
-  document.getElementById('rightImg').src = lstMember[cmp2][head2].image;
-  document.getElementById('rightName').textContent = lstMember[cmp2][head2].name;
+  document.getElementById('leftImg').src = currentMerge.left[head1].image;
+  document.getElementById('leftName').textContent = currentMerge.left[head1].name;
+  document.getElementById('rightImg').src = currentMerge.right[head2].image;
+  document.getElementById('rightName').textContent = currentMerge.right[head2].name;
 }
 
 function choose(side) {
-  const winner = side === 'left' ? lstMember[cmp1][head1] : lstMember[cmp2][head2];
-  rec[nrec++] = winner;
+  const winner = side === 'left' ? currentMerge.left[head1] : currentMerge.right[head2];
+  rec.push(winner);
   finishSize++;
   if (side === 'left') head1++; else head2++;
 
-  // copy remaining elements if one list is done
-  while (head1 < lstMember[cmp1].length && head2 === lstMember[cmp2].length) {
-    rec[nrec++] = lstMember[cmp1][head1++];
+  // copy remaining if one side is done
+  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) {
+    rec.push(currentMerge.left[head1++]);
     finishSize++;
   }
-  while (head2 < lstMember[cmp2].length && head1 === lstMember[cmp1].length) {
-    rec[nrec++] = lstMember[cmp2][head2++];
+  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length) {
+    rec.push(currentMerge.right[head2++]);
     finishSize++;
   }
 
-  // merge completed lists back to parent
-  if (head1 === lstMember[cmp1].length && head2 === lstMember[cmp2].length) {
-    lstMember[parent[cmp1]] = [...rec];
-    lstMember.pop(); // remove cmp1
-    lstMember.pop(); // remove cmp2
-    parent.pop();
-    parent.pop();
-    cmp1 = lstMember.length - 2;
-    cmp2 = lstMember.length - 1;
-    rec = [];
-    nrec = 0;
+  // if merge is done
+  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
+    // add merged list back to the queue if more merges remain
+    if (mergeQueue.length) {
+      currentMerge = mergeQueue.shift();
+      head1 = 0;
+      head2 = 0;
+      rec = [];
+      numQuestion++;
+      showImage();
+    } else {
+      // tournament complete
+      showResult();
+    }
+  } else {
+    numQuestion++;
+    showImage();
   }
+}
 
-  numQuestion++;
-  if (cmp1 < 0) showResult();
-  else showImage();
+function startTournament() {
+  currentMerge = mergeQueue.shift();
+  head1 = 0;
+  head2 = 0;
+  rec = [];
+  showImage();
 }
 
 function showResult() {
   document.getElementById('choices').style.display = 'none';
   const rankingDiv = document.getElementById('ranking');
-  lstMember[0].forEach(song => {
+  songs.forEach(song => {
     const li = document.createElement('li');
     li.textContent = song.name;
     rankingDiv.appendChild(li);
@@ -269,8 +269,8 @@ function showResult() {
   document.getElementById('result').classList.remove('hidden');
 }
 
-showImage();
-</script>
+startTournament();
 
+</script>
 </body>
 </html>
