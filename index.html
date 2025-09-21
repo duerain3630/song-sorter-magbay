@@ -15,9 +15,10 @@
       align-items: center;
     }
     h1 {
-      margin: 20px 0;
-      font-size: 2em;
-      text-align: center;
+      margin: 30px 0 10px;
+      font-size: 2.2em;
+      text-align: center;       /* ✅ keeps heading centered */
+      width: 100%;
     }
     .container {
       display: flex;
@@ -29,10 +30,10 @@
       margin: 20px;
     }
     .panel {
+      position: relative;       /* ✅ so child overlay positions correctly */
       width: 600px;
       height: 600px;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       border-radius: 12px;
@@ -45,10 +46,10 @@
       transform: scale(1.02);
     }
     .left {
-      background-color: #d7e9ff; /* light blue */
+      background-color: #d7e9ff;
     }
     .right {
-      background-color: #ffe3e3; /* light red */
+      background-color: #ffe3e3;
     }
     .panel img {
       width: 100%;
@@ -57,14 +58,20 @@
     }
     .song-name {
       position: absolute;
-      bottom: 20px;
+      bottom: 30px;               /* ✅ more space above bottom */
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.5);
+      background: linear-gradient(
+        rgba(0,0,0,0.6),
+        rgba(0,0,0,0.3)
+      );                           /* ✅ subtle gradient for readability */
       color: #fff;
-      padding: 8px 16px;
+      padding: 10px 18px;
       border-radius: 8px;
       font-size: 1.4em;
+      max-width: 90%;
+      text-align: center;
+      word-wrap: break-word;
     }
     .hidden {
       display: none;
@@ -126,7 +133,7 @@ const songs = [
   { name: "Death & Romance", image: "images/death-romance.jpeg" },
   { name: "Tunnel Vision", image: "images/tunnel-vision.jpeg" },
 
-  // Mini Mix 1
+  // mini mix, vol. 1
   { name: "U Wanna Dance?", image: "images/mini-mix-vol-1.jpeg" },
   { name: "Nothing Baby", image: "images/mini-mix-vol-1.jpeg" },
   { name: "El Dorado", image: "images/mini-mix-vol-1.jpeg" },
@@ -134,11 +141,11 @@ const songs = [
   { name: "Turning Off the Rain", image: "images/mini-mix-vol-1.jpeg" },
   { name: "Intro", image: "images/mini-mix-vol-1.jpeg" },
 
-  // ALRAAWF
+  // A Little Rhythm and a Wicked Feeling
   { name: "Stop & Go", image: "images/a-little-rhythm-and-a-wicked-feeling.jpeg" },
   { name: "Story", image: "images/a-little-rhythm-and-a-wicked-feeling.jpeg" },
 
-  // Mini Mix 2
+  // mini mix, vol. 2
   { name: "I Don’t Want to Cry Anymore", image: "images/mini-mix-vol-2.jpeg" },
   { name: "Body", image: "images/mini-mix-vol-2.jpeg" },
   { name: "Sky2Fall (Reprise)", image: "images/mini-mix-vol-2.jpeg" },
@@ -156,7 +163,7 @@ const songs = [
   { name: "Prophecy", image: "images/mercurial-world.jpeg" },
   { name: "The End", image: "images/mercurial-world.jpeg" },
 
-  // Mercurial World Deluxe
+  // Mercurial World (Deluxe)
   { name: "Unconditional", image: "images/mercurial-world-deluxe.jpeg" },
   { name: "All You Do", image: "images/mercurial-world-deluxe.jpeg" },
   { name: "secret 1", image: "images/mercurial-world-deluxe.jpeg" },
@@ -168,7 +175,7 @@ const songs = [
   { name: "secret 14", image: "images/mercurial-world-deluxe.jpeg" },
   { name: "secret 15", image: "images/mercurial-world-deluxe.jpeg" },
 
-  // Mini Mix 3
+  // mini mix, vol. 3st
   { name: "Top Dog", image: "images/mini-mix-vol-3.jpeg" },
   { name: "EXO", image: "images/mini-mix-vol-3.jpeg" },
   { name: "2 Wheel Drive", image: "images/mini-mix-vol-3.jpeg" },
