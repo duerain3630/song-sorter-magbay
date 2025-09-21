@@ -12,60 +12,65 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 100vh;
+    padding: 20px;
   }
-  #battleNumber {
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: bold;
+
+  h1 { margin-bottom: 20px; }
+
+  #battleNumber { font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
+
+  #choices {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
     margin-bottom: 20px;
   }
+
   .song-card {
-    background-color: #ffffff;
+    background-color: #fff;
     border: 3px solid #ccc;
     border-radius: 10px;
-    width: 400px;
+    width: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     cursor: pointer;
+    transition: transform 0.1s;
   }
+  .song-card:hover { transform: scale(1.03); }
+
   .song-card img {
-    width: 300px;
-    height: 300px;
+    width: 280px;
+    height: 280px;
     object-fit: cover;
     border-radius: 8px;
     margin-bottom: 12px;
   }
+
   .song-card p {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     text-align: center;
     margin: 0;
-    color: #333;
   }
-  #choices {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 20px;
-  }
+
   #result {
     margin-top: 30px;
     text-align: center;
+    display: none;
   }
-  #ranking {
-    margin-top: 10px;
-    text-align: left;
-  }
+
+  #ranking { margin-top: 10px; text-align: left; display: inline-block; }
 </style>
 </head>
 <body>
 
 <h1>Magdalena Bay Song Tournament</h1>
-<div id="battleNumber"></div>
+<div id="battleNumber">Battle 1</div>
 
 <div id="choices">
   <div id="left" class="song-card" onclick="choose('left')">
@@ -78,7 +83,7 @@
   </div>
 </div>
 
-<div id="result" class="hidden">
+<div id="result">
   <h2>Final Ranking</h2>
   <ol id="ranking"></ol>
 </div>
@@ -182,70 +187,27 @@ const songs = [
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
 
-<script>
-let lists = songs.map(song => [song]); // each song in its own list
-let currentMerge = null;
+// --- Merge Sort Tournament Logic ---
+let lists = songs.map(s => [s]);
 let currentMergeQueue = [];
+let currentMerge = null;
 let head1 = 0, head2 = 0;
 let rec = [];
 let numQuestion = 1;
-let finishSize = 0;
 
-// show the current battle
-function showImage() {
-  document.getElementById('battleNumber').innerHTML =
-    `Battle ${numQuestion}<br>${Math.floor(finishSize / songs.length * 100)}% sorted`;
-  document.getElementById('leftImg').src = currentMerge.left[head1].image;
-  document.getElementById('leftName').textContent = currentMerge.left[head1].name;
-  document.getElementById('rightImg').src = currentMerge.right[head2].image;
-  document.getElementById('rightName').textContent = currentMerge.right[head2].name;
-}
-
-// handle a user choice
-function choose(side) {
-  const winner = side === 'left' ? currentMerge.left[head1] : currentMerge.right[head2];
-  rec.push(winner);
-  finishSize++;
-  if (side === 'left') head1++; else head2++;
-
-  // copy remaining if one side finished
-  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) rec.push(currentMerge.left[head1++], finishSize++);
-  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length) rec.push(currentMerge.right[head2++], finishSize++);
-
-  // if merge done
-  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
-    currentMerge.merged.push(...rec);
-    rec = [];
-    head1 = 0;
-    head2 = 0;
-    numQuestion++;
-
-    if (currentMergeQueue.length > 0) {
-      currentMerge = currentMergeQueue.shift();
-      showImage();
-    } else {
-      prepareNextRound();
-    }
-  } else {
-    numQuestion++;
-    showImage();
-  }
-}
-
-// prepare the next round of merges
 function prepareNextRound() {
-  const newLists = [];
+  let newLists = [];
   currentMergeQueue = [];
 
   while (lists.length > 0) {
     const left = lists.shift();
     const right = lists.shift();
-    const placeholder = [];
+    const merged = [];
     if (right) {
-      currentMergeQueue.push({ left, right, merged: placeholder });
-      newLists.push(placeholder);
+      currentMergeQueue.push({ left, right, merged });
+      newLists.push(merged);
     } else {
-      newLists.push(left); // carry over odd item
+      newLists.push(left);
     }
   }
 
@@ -253,19 +215,57 @@ function prepareNextRound() {
 
   if (currentMergeQueue.length > 0) {
     currentMerge = currentMergeQueue.shift();
+    head1 = 0;
+    head2 = 0;
+    rec = [];
     showImage();
   } else {
-    // tournament finished
     showResult();
   }
 }
 
-// show final ranking
+function showImage() {
+  if (!currentMerge) return;
+  document.getElementById('battleNumber').textContent = `Battle ${numQuestion}`;
+  document.getElementById('leftImg').src = currentMerge.left[head1].image;
+  document.getElementById('leftName').textContent = currentMerge.left[head1].name;
+  document.getElementById('rightImg').src = currentMerge.right[head2].image;
+  document.getElementById('rightName').textContent = currentMerge.right[head2].name;
+}
+
+function choose(side) {
+  if (!currentMerge) return;
+
+  rec.push(side === 'left' ? currentMerge.left[head1++] : currentMerge.right[head2++]);
+  numQuestion++;
+
+  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) rec.push(currentMerge.left[head1++]);
+  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length) rec.push(currentMerge.right[head2++]);
+
+  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
+    currentMerge.merged.push(...rec);
+    rec = [];
+    prepareNextMerge();
+  } else {
+    showImage();
+  }
+}
+
+function prepareNextMerge() {
+  if (currentMergeQueue.length > 0) {
+    currentMerge = currentMergeQueue.shift();
+    head1 = 0;
+    head2 = 0;
+    showImage();
+  } else {
+    prepareNextRound();
+  }
+}
+
 function showResult() {
   document.getElementById('choices').style.display = 'none';
   const resultDiv = document.getElementById('result');
-  resultDiv.classList.remove('hidden');
-  resultDiv.innerHTML = "<h2>Final Ranking</h2><ol id='ranking'></ol>";
+  resultDiv.style.display = 'block';
   const rankingList = document.getElementById('ranking');
   lists[0].forEach(song => {
     const li = document.createElement('li');
@@ -274,17 +274,9 @@ function showResult() {
   });
 }
 
-// start tournament
-function startTournament() {
-  lists = songs.map(song => [song]);
-  currentMergeQueue = [];
-  rec = [];
-  head1 = 0;
-  head2 = 0;
-  numQuestion = 1;
-  finishSize = 0;
-  prepareNextRound();
-}
-
-startTournament();
+// Start tournament immediately
+prepareNextRound();
 </script>
+
+</body>
+</html>
