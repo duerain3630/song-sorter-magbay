@@ -182,45 +182,31 @@ const songs = [
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
 
-let mergeQueue = []; // queue of lists to merge
+<script>
+let lists = songs.map(song => [song]); // split songs into single-item lists
 let currentMerge = null;
 let head1 = 0, head2 = 0;
 let rec = [];
 let numQuestion = 1;
 let finishSize = 0;
-const totalSize = songs.length;
 
-// recursively split songs into single-song lists
-function splitList(list) {
-  if (list.length <= 1) return [list];
-  const mid = Math.ceil(list.length / 2);
-  return [...splitList(list.slice(0, mid)), ...splitList(list.slice(mid))];
-}
-
-// initialize merge queue
-let lists = splitList(songs); 
-while (lists.length > 1) {
-  const left = lists.shift();
-  const right = lists.shift();
-  mergeQueue.push({ left, right });
-  lists.push(left.concat(right)); // keep track of merged lists for next rounds
-}
-
+// show current battle
 function showImage() {
-  document.getElementById('battleNumber').innerHTML = `Battle ${numQuestion}<br>${Math.floor(finishSize/totalSize*100)}% sorted`;
+  document.getElementById('battleNumber').innerHTML = `Battle ${numQuestion}<br>${Math.floor(finishSize / songs.length * 100)}% sorted`;
   document.getElementById('leftImg').src = currentMerge.left[head1].image;
   document.getElementById('leftName').textContent = currentMerge.left[head1].name;
   document.getElementById('rightImg').src = currentMerge.right[head2].image;
   document.getElementById('rightName').textContent = currentMerge.right[head2].name;
 }
 
+// handle user choice
 function choose(side) {
   const winner = side === 'left' ? currentMerge.left[head1] : currentMerge.right[head2];
   rec.push(winner);
   finishSize++;
   if (side === 'left') head1++; else head2++;
 
-  // copy remaining if one side is done
+  // copy remaining items if one side is finished
   while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) {
     rec.push(currentMerge.left[head1++]);
     finishSize++;
@@ -230,19 +216,20 @@ function choose(side) {
     finishSize++;
   }
 
-  // if merge is done
+  // if merge done
   if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
-    // add merged list back to the queue if more merges remain
-    if (mergeQueue.length) {
-      currentMerge = mergeQueue.shift();
-      head1 = 0;
-      head2 = 0;
-      rec = [];
-      numQuestion++;
+    currentMerge.merged.push(...rec); // store merged list in placeholder
+    rec = [];
+    head1 = 0;
+    head2 = 0;
+    numQuestion++;
+
+    // prepare next merge
+    if (currentMergeQueue.length > 0) {
+      currentMerge = currentMergeQueue.shift();
       showImage();
     } else {
-      // tournament complete
-      showResult();
+      prepareNextRound();
     }
   } else {
     numQuestion++;
@@ -250,27 +237,61 @@ function choose(side) {
   }
 }
 
-function startTournament() {
-  currentMerge = mergeQueue.shift();
-  head1 = 0;
-  head2 = 0;
-  rec = [];
-  showImage();
+// merge queue for current round
+let currentMergeQueue = [];
+
+function prepareNextRound() {
+  const newLists = [];
+  currentMergeQueue = [];
+
+  while (lists.length > 0) {
+    const left = lists.shift();
+    const right = lists.shift();
+    const placeholder = [];
+    if (right) {
+      currentMergeQueue.push({ left, right, merged: placeholder });
+      newLists.push(placeholder);
+    } else {
+      newLists.push(left); // odd item moves to next round
+    }
+  }
+
+  lists = newLists;
+
+  if (currentMergeQueue.length > 0) {
+    currentMerge = currentMergeQueue.shift();
+    showImage();
+  } else {
+    // tournament finished
+    showResult();
+  }
 }
 
+// show final ranking
 function showResult() {
   document.getElementById('choices').style.display = 'none';
-  const rankingDiv = document.getElementById('ranking');
-  songs.forEach(song => {
+  const resultDiv = document.getElementById('result');
+  resultDiv.classList.remove('hidden');
+  resultDiv.innerHTML = "<h2>Final Ranking</h2><ol id='ranking'></ol>";
+  const rankingList = document.getElementById('ranking');
+  lists[0].forEach(song => {
     const li = document.createElement('li');
     li.textContent = song.name;
-    rankingDiv.appendChild(li);
+    rankingList.appendChild(li);
   });
-  document.getElementById('result').classList.remove('hidden');
+}
+
+// start tournament
+function startTournament() {
+  lists = songs.map(song => [song]);
+  currentMergeQueue = [];
+  rec = [];
+  head1 = 0;
+  head2 = 0;
+  numQuestion = 1;
+  finishSize = 0;
+  prepareNextRound();
 }
 
 startTournament();
-
 </script>
-</body>
-</html>
