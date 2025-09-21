@@ -1,96 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Magdalena Bay Song Tournament</title>
-  <style>
-    body {
-      background-color: #f3f4f6;
-      margin: 0;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    #battleNumber {
-      text-align: center;
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    #choices {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      margin-bottom: 20px;
-    }
-
-    .song-card {
-      background-color: #ffffff;
-      border: 3px solid #ccc;
-      border-radius: 10px;
-      width: 600px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      cursor: pointer;
-    }
-
-    .song-card img {
-      width: 600px;
-      height: 600px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-
-    .song-card p {
-      font-size: 1.2rem;
-      font-weight: 600;
-      text-align: center;
-      margin: 0;
-      color: #333;
-    }
-
-    #result {
-      margin-top: 30px;
-      text-align: center;
-    }
-
-    #ranking {
-      margin-top: 10px;
-      text-align: left;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magdalena Bay Song Tournament</title>
+<style>
+  body {
+    background-color: #f3f4f6;
+    margin: 0;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  #battleNumber {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  .song-card {
+    background-color: #ffffff;
+    border: 3px solid #ccc;
+    border-radius: 10px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+  }
+  .song-card img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .song-card p {
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    margin: 0;
+    color: #333;
+  }
+  #choices {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+  }
+  #result {
+    margin-top: 30px;
+    text-align: center;
+  }
+  #ranking {
+    margin-top: 10px;
+    text-align: left;
+  }
+</style>
 </head>
 <body>
-  <h1>Song Tournament</h1>
-  <div class="container" id="choices">
-    <div id="left" class="song-card" onclick="choose('left')">
-      <img id="leftImg" src="" alt="">
-      <p id="leftName"></p>
-    </div>
-    <div id="right" class="song-card" onclick="choose('right')">
-      <img id="rightImg" src="" alt="">
-      <p id="rightName"></p>
-    </div>
+
+<h1>Magdalena Bay Song Tournament</h1>
+<div id="battleNumber"></div>
+
+<div id="choices">
+  <div id="left" class="song-card" onclick="choose('left')">
+    <img id="leftImg" src="" alt="">
+    <p id="leftName"></p>
   </div>
-
-  <div id="result" class="hidden">
-    <h2>Final Ranking</h2>
-    <ol id="ranking"></ol>
+  <div id="right" class="song-card" onclick="choose('right')">
+    <img id="rightImg" src="" alt="">
+    <p id="rightName"></p>
   </div>
+</div>
 
-  <script>
+<div id="result" class="hidden">
+  <h2>Final Ranking</h2>
+  <ol id="ranking"></ol>
+</div>
 
-      const songs = [
+<script>
+const songs = [
   { name: "Ghost", image: "images/ghost.jpeg" },
   { name: "Voc Pop", image: "images/voc-pop.jpeg" },
   { name: "Only If You Want It", image: "images/only-if-you-want-it.jpeg" },
@@ -164,7 +158,7 @@
   { name: "secret 14", image: "images/mercurial-world-deluxe.jpeg" },
   { name: "secret 15", image: "images/mercurial-world-deluxe.jpeg" },
 
-  // mini mix, vol. 3st
+  // mini mix, vol. 3
   { name: "Top Dog", image: "images/mini-mix-vol-3.jpeg" },
   { name: "EXO", image: "images/mini-mix-vol-3.jpeg" },
   { name: "2 Wheel Drive", image: "images/mini-mix-vol-3.jpeg" },
@@ -187,63 +181,96 @@
   { name: "Feeling DiskInserted?", image: "images/imaginal-disk.jpeg" },
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
-    
-    // generate all pairs
-    let pairs = [];
-    for (let i = 0; i < songs.length; i++) {
-      for (let j = i + 1; j < songs.length; j++) {
-        pairs.push([songs[i], songs[j]]);
-      }
+
+// Merge-sort style tournament
+let lstMember = [[...songs]]; // start with all songs in one list
+let parent = [-1];
+let cmp1 = lstMember.length - 2;
+let cmp2 = lstMember.length - 1;
+let head1 = 0;
+let head2 = 0;
+let rec = [];
+let nrec = 0;
+let totalSize = 0;
+songs.forEach(() => totalSize++);
+let finishSize = 0;
+let numQuestion = 1;
+
+// Split lists for merge sort
+function splitLists() {
+  let n = 1;
+  for (let i = 0; i < lstMember.length; i++) {
+    if (lstMember[i].length >= 2) {
+      let mid = Math.ceil(lstMember[i].length / 2);
+      let left = lstMember[i].slice(0, mid);
+      let right = lstMember[i].slice(mid);
+      lstMember.push(left);
+      parent.push(i);
+      lstMember.push(right);
+      parent.push(i);
+      n += 2;
     }
+  }
+  cmp1 = lstMember.length - 2;
+  cmp2 = lstMember.length - 1;
+}
+splitLists();
 
-    // shuffle
-    pairs = pairs.sort(() => Math.random() - 0.5);
+function showImage() {
+  document.getElementById('battleNumber').innerHTML = `Battle ${numQuestion}<br>${Math.floor(finishSize/totalSize*100)}% sorted`;
+  document.getElementById('leftImg').src = lstMember[cmp1][head1].image;
+  document.getElementById('leftName').textContent = lstMember[cmp1][head1].name;
+  document.getElementById('rightImg').src = lstMember[cmp2][head2].image;
+  document.getElementById('rightName').textContent = lstMember[cmp2][head2].name;
+}
 
-    const wins = {};  // keep track of number of wins per song
-    songs.forEach(song => wins[song.name] = 0);
+function choose(side) {
+  const winner = side === 'left' ? lstMember[cmp1][head1] : lstMember[cmp2][head2];
+  rec[nrec++] = winner;
+  finishSize++;
+  if (side === 'left') head1++; else head2++;
 
-    let currentPair = null;
+  // copy remaining elements if one list is done
+  while (head1 < lstMember[cmp1].length && head2 === lstMember[cmp2].length) {
+    rec[nrec++] = lstMember[cmp1][head1++];
+    finishSize++;
+  }
+  while (head2 < lstMember[cmp2].length && head1 === lstMember[cmp1].length) {
+    rec[nrec++] = lstMember[cmp2][head2++];
+    finishSize++;
+  }
 
-    function nextPair() {
-      if (pairs.length === 0) {
-        document.querySelector('h1').textContent = "All matchups done!";
-        document.getElementById('choices').style.display = 'none';
-        showRanking();
-        return;
-      }
-      currentPair = pairs.pop();
-      document.getElementById('leftImg').src = currentPair[0].image;
-      document.getElementById('leftName').textContent = currentPair[0].name;
-      document.getElementById('rightImg').src = currentPair[1].image;
-      document.getElementById('rightName').textContent = currentPair[1].name;
-    }
+  // merge completed lists back to parent
+  if (head1 === lstMember[cmp1].length && head2 === lstMember[cmp2].length) {
+    lstMember[parent[cmp1]] = [...rec];
+    lstMember.pop(); // remove cmp1
+    lstMember.pop(); // remove cmp2
+    parent.pop();
+    parent.pop();
+    cmp1 = lstMember.length - 2;
+    cmp2 = lstMember.length - 1;
+    rec = [];
+    nrec = 0;
+  }
 
-    function choose(side) {
-      const winner = side === 'left' ? currentPair[0] : currentPair[1];
-      wins[winner.name]++;
+  numQuestion++;
+  if (cmp1 < 0) showResult();
+  else showImage();
+}
 
-      // remove duplicate pairs
-      pairs = pairs.filter(([a,b]) => {
-        if (a.name === currentPair[0].name && b.name === currentPair[1].name) return false;
-        if (a.name === currentPair[1].name && b.name === currentPair[0].name) return false;
-        return true;
-      });
+function showResult() {
+  document.getElementById('choices').style.display = 'none';
+  const rankingDiv = document.getElementById('ranking');
+  lstMember[0].forEach(song => {
+    const li = document.createElement('li');
+    li.textContent = song.name;
+    rankingDiv.appendChild(li);
+  });
+  document.getElementById('result').classList.remove('hidden');
+}
 
-      nextPair();
-    }
+showImage();
+</script>
 
-    function showRanking() {
-      const rankingDiv = document.getElementById('ranking');
-      const sorted = Object.entries(wins).sort((a,b) => b[1]-a[1]);
-      sorted.forEach(([name, score]) => {
-        const li = document.createElement('li');
-        li.textContent = `${name} (${score} wins)`;
-        rankingDiv.appendChild(li);
-      });
-      document.getElementById('result').classList.remove('hidden');
-    }
-
-    nextPair();
-  </script>
 </body>
 </html>
