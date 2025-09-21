@@ -3,113 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Song Tournament</title>
+  <title>Magdalena Bay Song Tournament</title>
   <style>
-    /* --- Layout container --- */
-body {
-  background-color: #f3f4f6; /* light gray background */
-  margin: 0;
-  font-family: sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
+    body {
+      background-color: #f3f4f6;
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
 
-/* Center the “Match #” text */
-#battleNumber {
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
+    #battleNumber {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
 
-/* Container holding the two choices side-by-side */
-#choices {
-  display: flex;
-  justify-content: center;
-  gap: 30px;         /* space between left/right boxes */
-  margin-bottom: 20px;
-}
+    #choices {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
 
-/* Each choice box (image + song name) */
-.song-card {
-  background-color: #ffffff;
-  border: 3px solid #ccc;
-  border-radius: 10px;
-  width: 600px;
-  height: auto;      /* allow height to grow with content */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+    .song-card {
+      background-color: #ffffff;
+      border: 3px solid #ccc;
+      border-radius: 10px;
+      width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
 
-/* Album cover image */
-.song-card img {
-  width: 600px;
-  height: 600px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 12px; /* space between image and name */
-}
+    .song-card img {
+      width: 600px;
+      height: 600px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
 
-/* Song name text */
-.song-card p {
-  font-size: 1.2rem;
-  font-weight: 600;
-  text-align: center;
-  margin: 0;
-  color: #333;
-}
+    .song-card p {
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-align: center;
+      margin: 0;
+      color: #333;
+    }
 
-/* Buttons row */
-#buttons {
-  display: flex;
-  gap: 20px;
-  margin-top: 10px;
-}
-#buttons button {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #fff;
-  transition: background 0.2s;
-}
-#choose-left { background: #3b82f6; }   /* blue */
-#choose-left:hover { background: #2563eb; }
-#choose-right { background: #10b981; }  /* green */
-#choose-right:hover { background: #059669; }
+    #result {
+      margin-top: 30px;
+      text-align: center;
+    }
 
-/* Final result list */
-#result {
-  margin-top: 30px;
-  text-align: center;
-}
-#ranking {
-  margin-top: 10px;
-  text-align: left;
-}
+    #ranking {
+      margin-top: 10px;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
   <h1>Song Tournament</h1>
-  <div class="container">
-    <div id="left" class="panel left" onclick="choose('left')">
+  <div class="container" id="choices">
+    <div id="left" class="song-card" onclick="choose('left')">
       <img id="leftImg" src="" alt="">
-      <div id="leftName" class="song-name"></div>
+      <p id="leftName"></p>
     </div>
-    <div id="right" class="panel right" onclick="choose('right')">
+    <div id="right" class="song-card" onclick="choose('right')">
       <img id="rightImg" src="" alt="">
-      <div id="rightName" class="song-name"></div>
+      <p id="rightName"></p>
     </div>
   </div>
 
+  <div id="result" class="hidden">
+    <h2>Final Ranking</h2>
+    <ol id="ranking"></ol>
+  </div>
+
   <script>
+
       const songs = [
   { name: "Ghost", image: "images/ghost.jpeg" },
   { name: "Voc Pop", image: "images/voc-pop.jpeg" },
@@ -207,43 +187,60 @@ body {
   { name: "Feeling DiskInserted?", image: "images/imaginal-disk.jpeg" },
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
-
-    // ===== Pair Generation (random / dynamic tournament style) =====
+    
+    // generate all pairs
     let pairs = [];
     for (let i = 0; i < songs.length; i++) {
       for (let j = i + 1; j < songs.length; j++) {
         pairs.push([songs[i], songs[j]]);
       }
     }
-    // shuffle pairs for randomness
+
+    // shuffle
     pairs = pairs.sort(() => Math.random() - 0.5);
 
-    const decided = new Set();
+    const wins = {};  // keep track of number of wins per song
+    songs.forEach(song => wins[song.name] = 0);
+
     let currentPair = null;
 
     function nextPair() {
       if (pairs.length === 0) {
         document.querySelector('h1').textContent = "All matchups done!";
-        document.querySelector('.container').classList.add('hidden');
+        document.getElementById('choices').style.display = 'none';
+        showRanking();
         return;
       }
       currentPair = pairs.pop();
-      document.getElementById('leftImg').src = currentPair[0].img;
+      document.getElementById('leftImg').src = currentPair[0].image;
       document.getElementById('leftName').textContent = currentPair[0].name;
-      document.getElementById('rightImg').src = currentPair[1].img;
+      document.getElementById('rightImg').src = currentPair[1].image;
       document.getElementById('rightName').textContent = currentPair[1].name;
     }
 
     function choose(side) {
       const winner = side === 'left' ? currentPair[0] : currentPair[1];
-      const loser  = side === 'left' ? currentPair[1] : currentPair[0];
-      decided.add(`${winner.name} > ${loser.name}`);
-      // Remove any redundant comparisons if transitive logic applies
+      wins[winner.name]++;
+
+      // remove duplicate pairs
       pairs = pairs.filter(([a,b]) => {
-        if (decided.has(`${a.name} > ${b.name}`) || decided.has(`${b.name} > ${a.name}`)) return false;
+        if (a.name === currentPair[0].name && b.name === currentPair[1].name) return false;
+        if (a.name === currentPair[1].name && b.name === currentPair[0].name) return false;
         return true;
       });
+
       nextPair();
+    }
+
+    function showRanking() {
+      const rankingDiv = document.getElementById('ranking');
+      const sorted = Object.entries(wins).sort((a,b) => b[1]-a[1]);
+      sorted.forEach(([name, score]) => {
+        const li = document.createElement('li');
+        li.textContent = `${name} (${score} wins)`;
+        rankingDiv.appendChild(li);
+      });
+      document.getElementById('result').classList.remove('hidden');
     }
 
     nextPair();
