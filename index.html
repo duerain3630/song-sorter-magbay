@@ -100,7 +100,7 @@
     </div>
   </div>
 
-<script>
+    <script>
 const songs = [
   { name: "Ghost", image: "images/ghost.jpeg" },
   { name: "Voc Pop", image: "images/voc-pop.jpeg" },
@@ -198,15 +198,13 @@ const songs = [
   { name: "Feeling DiskInserted?", image: "images/imaginal-disk.jpeg" },
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
 ];
-
-    // ===== Pair Generation (random / dynamic tournament style) =====
+    
     let pairs = [];
     for (let i = 0; i < songs.length; i++) {
       for (let j = i + 1; j < songs.length; j++) {
         pairs.push([songs[i], songs[j]]);
       }
     }
-    // shuffle pairs for randomness
     pairs = pairs.sort(() => Math.random() - 0.5);
 
     const decided = new Set();
@@ -229,11 +227,10 @@ const songs = [
       const winner = side === 'left' ? currentPair[0] : currentPair[1];
       const loser  = side === 'left' ? currentPair[1] : currentPair[0];
       decided.add(`${winner.name} > ${loser.name}`);
-      // Remove any redundant comparisons if transitive logic applies
-      pairs = pairs.filter(([a,b]) => {
-        if (decided.has(`${a.name} > ${b.name}`) || decided.has(`${b.name} > ${a.name}`)) return false;
-        return true;
-      });
+      pairs = pairs.filter(([a,b]) =>
+        !decided.has(`${a.name} > ${b.name}`) &&
+        !decided.has(`${b.name} > ${a.name}`)
+      );
       nextPair();
     }
 
