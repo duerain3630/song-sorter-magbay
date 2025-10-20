@@ -15,11 +15,16 @@
     justify-content: flex-start;
     min-height: 100vh;
     padding: 20px;
+    font-size: 18px;
   }
 
   h1 { margin-bottom: 20px; }
 
   #battleNumber { font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
+  <div id="progressContainer">
+  <div id="progressBar"></div>
+</div>
+
 
   #choices {
     display: flex;
@@ -32,7 +37,7 @@
     background-color: #fff;
     border: 3px solid #ccc;
     border-radius: 10px;
-    width: 300px;
+    width: 360px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -44,8 +49,8 @@
   .song-card:hover { transform: scale(1.03); }
 
   .song-card img {
-    width: 280px;
-    height: 280px;
+    width: 340px;
+    height: 340px;
     object-fit: cover;
     border-radius: 8px;
     margin-bottom: 12px;
@@ -190,6 +195,9 @@ const songs = [
   { name: "Feeling DiskInserted?", image: "images/imaginal-disk.jpeg" },
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
+
+songs.sort(() => Math.random() - 0.5); // Shuffle song order randomly
+  
 // --- Merge Sort Tournament Logic ---
 let lists = songs.map(s => [s]);
 let currentMergeQueue = [];
@@ -279,6 +287,18 @@ function showResult() {
 
 // Start tournament immediately
 prepareNextRound();
+
+  // --- Keyboard controls ---
+document.addEventListener('keydown', (event) => {
+  if (!currentMerge) return; // no active battle
+
+  if (event.key === 'ArrowLeft') {
+    choose('left');
+  } else if (event.key === 'ArrowRight') {
+    choose('right');
+  }
+});
+
 </script>
 
 </body>
