@@ -151,7 +151,6 @@
   <ol id="ranking"></ol>
 </div>
 
-
 <script>
 const songs = [
   { name: "Ghost", image: "images/ghost.jpeg" },
@@ -256,9 +255,8 @@ const songs = [
   ];
 
 <script>
-songs.sort(() => Math.random() - 0.5); // Shuffle song order randomly
+songs.sort(() => Math.random() - 0.5); // Shuffle songs
 
-// --- Merge Sort Tournament Logic ---
 let lists = songs.map(s => [s]);
 let currentMergeQueue = [];
 let currentMerge = null;
@@ -266,22 +264,15 @@ let head1 = 0, head2 = 0;
 let rec = [];
 let numQuestion = 1;
 
-// --- Progress tracking ---
-let totalComparisons = Math.pow(songs.length, 2) / 2; // rough estimate
+let totalComparisons = Math.pow(songs.length, 2) / 2;
 let comparisonsLeft = totalComparisons;
 
-// --- Initialize progress bar elements ---
 function updateProgress() {
-  const progressBar = document.getElementById("progressBar");
-  const progressPercent = document.getElementById("progressPercent");
-  if (!progressBar || !progressPercent) return;
-
-  const percent = Math.max(
-    0,
-    Math.min(100, Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100))
-  );
-  progressBar.style.width = percent + "%";
-  progressPercent.textContent = percent + "%";
+  const bar = document.getElementById("progressBar");
+  const percentText = document.getElementById("progressPercent");
+  const percent = Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100);
+  bar.style.width = percent + "%";
+  percentText.textContent = percent + "%";
 }
 
 function prepareNextRound() {
@@ -301,7 +292,6 @@ function prepareNextRound() {
   }
 
   lists = newLists;
-
   if (currentMergeQueue.length > 0) {
     currentMerge = currentMergeQueue.shift();
     head1 = 0;
@@ -315,29 +305,16 @@ function prepareNextRound() {
 
 function showImage() {
   if (!currentMerge) return;
-  document.getElementById('battleNumber').textContent = `Battle ${numQuestion}`;
-  document.getElementById('leftImg').src = currentMerge.left[head1].image;
-  document.getElementById('leftName').textContent = currentMerge.left[head1].name;
-  document.getElementById('rightImg').src = currentMerge.right[head2].image;
-  document.getElementById('rightName').textContent = currentMerge.right[head2].name;
+  document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
+  document.getElementById("leftImg").src = currentMerge.left[head1].image;
+  document.getElementById("leftName").textContent = currentMerge.left[head1].name;
+  document.getElementById("rightImg").src = currentMerge.right[head2].image;
+  document.getElementById("rightName").textContent = currentMerge.right[head2].name;
 }
 
-function prepareNextMerge() {
-  if (currentMergeQueue.length > 0) {
-    currentMerge = currentMergeQueue.shift();
-    head1 = 0;
-    head2 = 0;
-    showImage();
-  } else {
-    prepareNextRound();
-  }
-}
-
-// --- Updated choose() function with progress + key disable ---
 function choose(side) {
   if (!currentMerge) return;
-
-  rec.push(side === 'left' ? currentMerge.left[head1++] : currentMerge.right[head2++]);
+  rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
   numQuestion++;
   comparisonsLeft--;
 
@@ -355,25 +332,33 @@ function choose(side) {
   }
 
   updateProgress();
+  if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
+}
 
-  if (comparisonsLeft <= 0) {
-    document.removeEventListener("keydown", keyListener);
+function prepareNextMerge() {
+  if (currentMergeQueue.length > 0) {
+    currentMerge = currentMergeQueue.shift();
+    head1 = 0;
+    head2 = 0;
+    showImage();
+  } else {
+    prepareNextRound();
   }
 }
 
 function showResult() {
-  document.getElementById('choices').style.display = 'none';
-  const resultDiv = document.getElementById('result');
-  resultDiv.style.display = 'block';
-  const rankingList = document.getElementById('ranking');
+  document.getElementById("choices").style.display = "none";
+  const resultDiv = document.getElementById("result");
+  resultDiv.style.display = "block";
+  const rankingList = document.getElementById("ranking");
   lists[0].forEach(song => {
-    const li = document.createElement('li');
+    const li = document.createElement("li");
     li.textContent = song.name;
     rankingList.appendChild(li);
   });
 }
 
-// --- Keyboard controls (arrow keys) ---
+// --- Keyboard controls ---
 function keyListener(event) {
   if (comparisonsLeft <= 0) return;
   if (event.key === "ArrowLeft") choose("left");
@@ -381,9 +366,6 @@ function keyListener(event) {
 }
 document.addEventListener("keydown", keyListener);
 
-// --- Start tournament ---
 prepareNextRound();
 updateProgress();
 </script>
-</body>
-</html>
