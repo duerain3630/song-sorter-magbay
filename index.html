@@ -36,36 +36,34 @@
     text-align: center;
   }
 
-  #progress-container {
-  width: 100%;
-  background-color: #ddd;
+#progress-container {
+  width: 80%;
+  max-width: 600px;
+  background: #ddd;
   border-radius: 8px;
-  overflow: hidden;
-  height: 24px;
-  margin-top: 10px;
+  height: 25px;
   position: relative;
+  margin: 20px auto;
 }
 
-#progress-bar {
+#progressBar {
+  background: #4caf50;
+  height: 100%;
   width: 0%;
-  height: 100%;
-  background-color: #4caf50;
-  text-align: center;
-  color: white;
-  font-weight: bold;
-  transition: width 0.3s ease;
+  border-radius: 8px;
+  transition: width 0.3s;
   position: relative;
 }
 
-#progress-percent {
+#progressPercent {
   position: absolute;
-  width: 100%;
-  left: 0;
   top: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  line-height: 25px;
+  font-weight: bold;
+  color: white;
 }
   
 #choices {
@@ -123,33 +121,34 @@
 </style>
 </head>
 <body>
-
-<h1>Magdalena Bay Song Tournament</h1>
-<div id="battleNumber">Battle 1</div>
-
-<!-- ✅ Progress bar -->
-<div id="progressContainer" style="width: 80%; max-width: 600px; background: #ddd; border-radius: 8px; height: 25px; position: relative; margin-bottom: 20px;">
-  <div id="progressBar" style="background: #4caf50; height: 100%; width: 0%; border-radius: 8px;"></div>
-  <div id="progressPercent" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; line-height: 25px; font-weight: bold; color: #fff;">0%</div>
-</div>
-
-<!-- ✅ Song choices -->
-<div id="choices">
-  <div id="left" class="song-card" onclick="choose('left')">
-    <img id="leftImg" src="" alt="">
-    <p id="leftName"></p>
+  
+  <h1>Magdalena Bay Song Tournament</h1>
+  <div id="battleNumber">Battle 1</div>
+  
+  <!-- Progress Bar -->
+  <div id="progress-container">
+    <div id="progressBar">
+      <span id="progressPercent">0%</span>
+    </div>
   </div>
-  <div id="right" class="song-card" onclick="choose('right')">
-    <img id="rightImg" src="" alt="">
-    <p id="rightName"></p>
-  </div>
-</div>
 
-<!-- ✅ Final result section -->
-<div id="result">
-  <h2>Final Ranking</h2>
-  <ol id="ranking"></ol>
-</div>
+  <div id="choices">
+    <div class="choice" id="left" onclick="choose('left')">
+      <img id="leftImg" src="" alt="Left Song">
+      <div id="leftName"></div>
+    </div>
+
+    <div class="choice" id="right" onclick="choose('right')">
+      <img id="rightImg" src="" alt="Right Song">
+      <div id="rightName"></div>
+    </div>
+  </div>
+
+  <div id="result" style="display:none;">
+    <h2>Final Ranking</h2>
+    <ol id="ranking"></ol>
+  </div>
+</body>
 
 <script>
 const songs = [
@@ -252,120 +251,132 @@ const songs = [
   { name: "Vampire in the Corner", image: "images/imaginal-disk.jpeg" },
   { name: "Feeling DiskInserted?", image: "images/imaginal-disk.jpeg" },
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
-  ];
+];
 
 <script>
-songs.sort(() => Math.random() - 0.5); // Shuffle songs
+  // --- Shuffle songs ---
+  songs.sort(() => Math.random() - 0.5);
 
-let lists = songs.map(s => [s]);
-let currentMergeQueue = [];
-let currentMerge = null;
-let head1 = 0, head2 = 0;
-let rec = [];
-let numQuestion = 1;
+  // --- Merge Sort Tournament Logic ---
+  let lists = songs.map(s => [s]);
+  let currentMergeQueue = [];
+  let currentMerge = null;
+  let head1 = 0, head2 = 0;
+  let rec = [];
+  let numQuestion = 1;
 
-let totalComparisons = Math.pow(songs.length, 2) / 2;
-let comparisonsLeft = totalComparisons;
+  // --- Progress tracking ---
+  let totalComparisons = Math.pow(songs.length, 2) / 2; // rough estimate
+  let comparisonsLeft = totalComparisons;
 
-function updateProgress() {
-  const bar = document.getElementById("progressBar");
-  const percentText = document.getElementById("progressPercent");
-  const percent = Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100);
-  bar.style.width = percent + "%";
-  percentText.textContent = percent + "%";
-}
+  // --- Update progress bar ---
+  function updateProgress() {
+    const bar = document.getElementById("progressBar");
+    const percentText = document.getElementById("progressPercent");
+    const percent = Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100);
+    bar.style.width = percent + "%";
+    percentText.textContent = percent + "%";
+  }
 
-function prepareNextRound() {
-  let newLists = [];
-  currentMergeQueue = [];
+  // --- Show current battle ---
+  function showImage() {
+    if (!currentMerge) return;
+    document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
+    document.getElementById("leftImg").src = currentMerge.left[head1].image;
+    document.getElementById("leftName").textContent = currentMerge.left[head1].name;
+    document.getElementById("rightImg").src = currentMerge.right[head2].image;
+    document.getElementById("rightName").textContent = currentMerge.right[head2].name;
+  }
 
-  while (lists.length > 0) {
-    const left = lists.shift();
-    const right = lists.shift();
-    const merged = [];
-    if (right) {
-      currentMergeQueue.push({ left, right, merged });
-      newLists.push(merged);
+  // --- Choose a song ---
+  function choose(side) {
+    if (!currentMerge) return;
+
+    rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
+    numQuestion++;
+    comparisonsLeft--;
+
+    while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
+      rec.push(currentMerge.left[head1++]);
+    while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
+      rec.push(currentMerge.right[head2++]);
+
+    if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
+      currentMerge.merged.push(...rec);
+      rec = [];
+      prepareNextMerge();
     } else {
-      newLists.push(left);
+      showImage();
+    }
+
+    updateProgress();
+    if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
+  }
+
+  // --- Prepare next merge ---
+  function prepareNextMerge() {
+    if (currentMergeQueue.length > 0) {
+      currentMerge = currentMergeQueue.shift();
+      head1 = 0;
+      head2 = 0;
+      showImage();
+    } else {
+      prepareNextRound();
     }
   }
 
-  lists = newLists;
-  if (currentMergeQueue.length > 0) {
-    currentMerge = currentMergeQueue.shift();
-    head1 = 0;
-    head2 = 0;
-    rec = [];
-    showImage();
-  } else {
-    showResult();
-  }
-}
+  // --- Prepare next round ---
+  function prepareNextRound() {
+    let newLists = [];
+    currentMergeQueue = [];
 
-function showImage() {
-  if (!currentMerge) return;
-  document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
-  document.getElementById("leftImg").src = currentMerge.left[head1].image;
-  document.getElementById("leftName").textContent = currentMerge.left[head1].name;
-  document.getElementById("rightImg").src = currentMerge.right[head2].image;
-  document.getElementById("rightName").textContent = currentMerge.right[head2].name;
-}
+    while (lists.length > 0) {
+      const left = lists.shift();
+      const right = lists.shift();
+      const merged = [];
+      if (right) {
+        currentMergeQueue.push({ left, right, merged });
+        newLists.push(merged);
+      } else {
+        newLists.push(left);
+      }
+    }
 
-function choose(side) {
-  if (!currentMerge) return;
-  rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
-  numQuestion++;
-  comparisonsLeft--;
+    lists = newLists;
 
-  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
-    rec.push(currentMerge.left[head1++]);
-  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
-    rec.push(currentMerge.right[head2++]);
-
-  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
-    currentMerge.merged.push(...rec);
-    rec = [];
-    prepareNextMerge();
-  } else {
-    showImage();
+    if (currentMergeQueue.length > 0) {
+      currentMerge = currentMergeQueue.shift();
+      head1 = 0;
+      head2 = 0;
+      rec = [];
+      showImage();
+    } else {
+      showResult();
+    }
   }
 
+  // --- Show final ranking ---
+  function showResult() {
+    document.getElementById("choices").style.display = "none";
+    const resultDiv = document.getElementById("result");
+    resultDiv.style.display = "block";
+    const rankingList = document.getElementById("ranking");
+    lists[0].forEach(song => {
+      const li = document.createElement("li");
+      li.textContent = song.name;
+      rankingList.appendChild(li);
+    });
+  }
+
+  // --- Keyboard controls ---
+  function keyListener(event) {
+    if (comparisonsLeft <= 0) return;
+    if (event.key === "ArrowLeft") choose("left");
+    if (event.key === "ArrowRight") choose("right");
+  }
+  document.addEventListener("keydown", keyListener);
+
+  // --- Start tournament ---
+  prepareNextRound();
   updateProgress();
-  if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
-}
-
-function prepareNextMerge() {
-  if (currentMergeQueue.length > 0) {
-    currentMerge = currentMergeQueue.shift();
-    head1 = 0;
-    head2 = 0;
-    showImage();
-  } else {
-    prepareNextRound();
-  }
-}
-
-function showResult() {
-  document.getElementById("choices").style.display = "none";
-  const resultDiv = document.getElementById("result");
-  resultDiv.style.display = "block";
-  const rankingList = document.getElementById("ranking");
-  lists[0].forEach(song => {
-    const li = document.createElement("li");
-    li.textContent = song.name;
-    rankingList.appendChild(li);
-  });
-}
-
-// --- Keyboard controls ---
-function keyListener(event) {
-  if (comparisonsLeft <= 0) return;
-  if (event.key === "ArrowLeft") choose("left");
-  if (event.key === "ArrowRight") choose("right");
-}
-document.addEventListener("keydown", keyListener);
-
-prepareNextRound();
-updateProgress();
 </script>
