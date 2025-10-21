@@ -36,22 +36,37 @@
     text-align: center;
   }
 
-  /* Progress bar */
-  #progressContainer {
-    width: 80%;
-    background-color: #ddd;
-    border-radius: 8px;
-    height: 20px;
-    margin-bottom: 25px;
-    overflow: hidden;
-  }
+  #progress-container {
+  width: 100%;
+  background-color: #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 24px;
+  margin-top: 10px;
+  position: relative;
+}
 
-  #progressBar {
-    width: 0%;
-    height: 100%;
-    background-color: #4caf50;
-    transition: width 0.3s ease;
-  }
+#progress-bar {
+  width: 0%;
+  height: 100%;
+  background-color: #4caf50;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+#progress-percent {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
   /* Song choices container */
   #choices {
@@ -116,9 +131,10 @@
 <h1>Magdalena Bay Song Tournament</h1>
 <div id="battleNumber">Battle 1</div>
 
-<!-- ✅ Moved here — no HTML inside <style> -->
-<div id="progressContainer">
-  <div id="progressBar"></div>
+<!-- ✅ Progress bar goes here (HTML, not CSS) -->
+<div id="progressContainer" style="width: 80%; max-width: 600px; background: #ddd; border-radius: 8px; height: 25px; position: relative; margin-bottom: 20px;">
+  <div id="progressBar" style="background: #4caf50; height: 100%; width: 0%; border-radius: 8px;"></div>
+  <div id="progressPercent" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; line-height: 25px; font-weight: bold; color: #fff;">0%</div>
 </div>
 
 <div id="choices">
@@ -240,8 +256,9 @@ const songs = [
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
   ];
 
+<script>
 songs.sort(() => Math.random() - 0.5); // Shuffle song order randomly
-  
+
 // --- Merge Sort Tournament Logic ---
 let lists = songs.map(s => [s]);
 let currentMergeQueue = [];
@@ -249,6 +266,24 @@ let currentMerge = null;
 let head1 = 0, head2 = 0;
 let rec = [];
 let numQuestion = 1;
+
+// --- Progress tracking ---
+let totalComparisons = Math.pow(songs.length, 2) / 2; // rough estimate
+let comparisonsLeft = totalComparisons;
+
+// --- Initialize progress bar elements ---
+function updateProgress() {
+  const progressBar = document.getElementById("progressBar");
+  const progressPercent = document.getElementById("progressPercent");
+  if (!progressBar || !progressPercent) return;
+
+  const percent = Math.max(
+    0,
+    Math.min(100, Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100))
+  );
+  progressBar.style.width = percent + "%";
+  progressPercent.textContent = percent + "%";
+}
 
 function prepareNextRound() {
   let newLists = [];
@@ -288,24 +323,6 @@ function showImage() {
   document.getElementById('rightName').textContent = currentMerge.right[head2].name;
 }
 
-function choose(side) {
-  if (!currentMerge) return;
-
-  rec.push(side === 'left' ? currentMerge.left[head1++] : currentMerge.right[head2++]);
-  numQuestion++;
-
-  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) rec.push(currentMerge.left[head1++]);
-  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length) rec.push(currentMerge.right[head2++]);
-
-  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
-    currentMerge.merged.push(...rec);
-    rec = [];
-    prepareNextMerge();
-  } else {
-    showImage();
-  }
-}
-
 function prepareNextMerge() {
   if (currentMergeQueue.length > 0) {
     currentMerge = currentMergeQueue.shift();
@@ -314,6 +331,34 @@ function prepareNextMerge() {
     showImage();
   } else {
     prepareNextRound();
+  }
+}
+
+// --- Updated choose() function with progress + key disable ---
+function choose(side) {
+  if (!currentMerge) return;
+
+  rec.push(side === 'left' ? currentMerge.left[head1++] : currentMerge.right[head2++]);
+  numQuestion++;
+  comparisonsLeft--;
+
+  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
+    rec.push(currentMerge.left[head1++]);
+  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
+    rec.push(currentMerge.right[head2++]);
+
+  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
+    currentMerge.merged.push(...rec);
+    rec = [];
+    prepareNextMerge();
+  } else {
+    showImage();
+  }
+
+  updateProgress();
+
+  if (comparisonsLeft <= 0) {
+    document.removeEventListener("keydown", keyListener);
   }
 }
 
@@ -329,21 +374,17 @@ function showResult() {
   });
 }
 
-// Start tournament immediately
+// --- Keyboard controls (arrow keys) ---
+function keyListener(event) {
+  if (comparisonsLeft <= 0) return;
+  if (event.key === "ArrowLeft") choose("left");
+  if (event.key === "ArrowRight") choose("right");
+}
+document.addEventListener("keydown", keyListener);
+
+// --- Start tournament ---
 prepareNextRound();
-
-  // --- Keyboard controls ---
-document.addEventListener('keydown', (event) => {
-  if (!currentMerge) return; // no active battle
-
-  if (event.key === 'ArrowLeft') {
-    choose('left');
-  } else if (event.key === 'ArrowRight') {
-    choose('right');
-  }
-});
-
+updateProgress();
 </script>
-
 </body>
 </html>
