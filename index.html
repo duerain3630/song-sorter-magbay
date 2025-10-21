@@ -6,11 +6,6 @@
 <title>Magdalena Bay Song Tournament</title>
 
 <style>
-  /* Reset + base setup */
-  * {
-    box-sizing: border-box;
-  }
-
   body {
     background-color: #f3f4f6;
     margin: 0;
@@ -36,72 +31,70 @@
     text-align: center;
   }
 
-#progress-container {
-  width: 80%;
-  max-width: 600px;
-  background: #ddd;
-  border-radius: 8px;
-  height: 25px;
-  position: relative;
-  margin: 20px auto;
-}
+  #progress-container {
+    width: 80%;
+    max-width: 600px;
+    background: #ddd;
+    border-radius: 8px;
+    height: 25px;
+    position: relative;
+    margin-bottom: 20px;
+  }
 
-#progressBar {
-  background: #4caf50;
-  height: 100%;
-  width: 0%;
-  border-radius: 8px;
-  transition: width 0.3s;
-  position: relative;
-}
+  #progressBar {
+    background: #4caf50;
+    height: 100%;
+    width: 0%;
+    border-radius: 8px;
+    transition: width 0.3s;
+    position: relative;
+  }
 
-#progressPercent {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  line-height: 25px;
-  font-weight: bold;
-  color: white;
-}
-  
-#choices {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-  flex-wrap: nowrap;
-  margin-top: 20px;
-}
+  #progressPercent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    line-height: 25px;
+    font-weight: bold;
+    color: white;
+  }
 
-.song-card {
-  background-color: #fff;
-  border: 3px solid #ccc;
-  border-radius: 10px;
-  width: 360px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-.song-card:hover {
-  transform: scale(1.03);
-}
+  #choices {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+    flex-wrap: nowrap;
+  }
 
-.song-card img {
-  width: 340px;
-  height: 340px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
+  .song-card {
+    background-color: #fff;
+    border: 3px solid #ccc;
+    border-radius: 10px;
+    width: 45vw;       /* responsive width */
+    max-width: 420px;  /* cap at 420px */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .song-card:hover { transform: scale(1.03); }
+
+  .song-card img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
 
   .song-card p {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     text-align: center;
     margin: 0;
@@ -121,137 +114,28 @@
 </style>
 </head>
 <body>
-  
   <h1>Magdalena Bay Song Tournament</h1>
   <div id="battleNumber">Battle 1</div>
-  
-  <!-- Progress Bar -->
+
   <div id="progress-container">
-    <div id="progressBar">
-      <span id="progressPercent">0%</span>
-    </div>
+    <div id="progressBar"><span id="progressPercent">0%</span></div>
   </div>
 
   <div id="choices">
-    <div class="choice" id="left" onclick="choose('left')">
+    <div class="song-card" id="left" onclick="choose('left')">
       <img id="leftImg" src="" alt="Left Song">
-      <div id="leftName"></div>
+      <p id="leftName"></p>
     </div>
-
-    <div class="choice" id="right" onclick="choose('right')">
+    <div class="song-card" id="right" onclick="choose('right')">
       <img id="rightImg" src="" alt="Right Song">
-      <div id="rightName"></div>
+      <p id="rightName"></p>
     </div>
   </div>
 
-  <div id="result" style="display:none;">
+  <div id="result">
     <h2>Final Ranking</h2>
     <ol id="ranking"></ol>
   </div>
-</body>
-
-<script>
-const songs = [
-  { name: "Ghost", image: "images/ghost.jpeg" },
-  { name: "Voc Pop", image: "images/voc-pop.jpeg" },
-  { name: "Only If You Want It", image: "images/only-if-you-want-it.jpeg" },
-  { name: "The Girls", image: "images/the-girls.jpeg" },
-  { name: "Money Lover", image: "images/money-lover.jpeg" },
-  { name: "Push Me Away", image: "images/push-me-away.jpeg" },
-  { name: "Set Me Off", image: "images/set-me-off.jpeg" },
-  { name: "Waking Up", image: "images/waking-up.jpeg" },
-  { name: "#wastehistime", image: "images/wastehistime.jpeg" },
-  { name: "Head Over Heels", image: "images/head-over-heels.jpeg" },
-  { name: "Drive Alone", image: "images/drive-alone.jpeg" },
-  { name: "Move Slow", image: "images/move-slow.jpeg" },
-  { name: "Neon", image: "images/neon.jpeg" },
-  { name: "Redbone", image: "images/redbone.jpeg" },
-  { name: "Mine", image: "images/mine.jpeg" },
-  { name: "Airplane", image: "images/airplane.jpeg" },
-  { name: "Killshot", image: "images/killshot.jpeg" },
-  { name: "Good Intentions", image: "images/good-intentions.jpeg" },
-  { name: "Venice", image: "images/venice.jpeg" },
-  { name: "Oh Hell", image: "images/oh-hell.jpeg" },
-  { name: "How to Get Physical", image: "images/how-to-get-physical.jpeg" },
-  { name: "Hideaway", image: "images/hideaway.jpeg" },
-  { name: "Sky2Fall", image: "images/sky2fall.jpeg" },
-  { name: "Woww", image: "images/woww.jpeg" },
-  { name: "Live 4ever", image: "images/live-4ever.jpeg" },
-  { name: "You Lose!", image: "images/you-lose.jpeg" },
-  { name: "Secrets (Your Fire)", image: "images/secrets-your-fire.jpeg" },
-  { name: "Chaeri", image: "images/chaeri.jpeg" },
-  { name: "Death & Romance", image: "images/death-romance.jpeg" },
-  { name: "Tunnel Vision", image: "images/tunnel-vision.jpeg" },
-  { name: "Second Sleep", image: "images/second-sleep-star-eyes.jpeg" },
-  { name: "Star Eyes", image: "images/second-sleep-star-eyes.jpeg" },
-  { name: "Human Happens", image: "images/human-happens-paint-me-a-picture.jpeg" },
-  { name: "Paint Me a Picture", image: "images/human-happens-paint-me-a-picture.jpeg" },
-
-  // mini mix, vol. 1
-  { name: "U Wanna Dance?", image: "images/mini-mix-vol-1.jpeg" },
-  { name: "Nothing Baby", image: "images/mini-mix-vol-1.jpeg" },
-  { name: "El Dorado", image: "images/mini-mix-vol-1.jpeg" },
-  { name: "Afternoon in Heaven", image: "images/mini-mix-vol-1.jpeg" },
-  { name: "Turning Off the Rain", image: "images/mini-mix-vol-1.jpeg" },
-  { name: "Intro", image: "images/mini-mix-vol-1.jpeg" },
-
-  // A Little Rhythm and a Wicked Feeling
-  { name: "Stop & Go", image: "images/a-little-rhythm-and-a-wicked-feeling.jpeg" },
-  { name: "Story", image: "images/a-little-rhythm-and-a-wicked-feeling.jpeg" },
-
-  // mini mix, vol. 2
-  { name: "I Don’t Want to Cry Anymore", image: "images/mini-mix-vol-2.jpeg" },
-  { name: "Body", image: "images/mini-mix-vol-2.jpeg" },
-  { name: "Sky2Fall (Reprise)", image: "images/mini-mix-vol-2.jpeg" },
-
-  // Mercurial World
-  { name: "Domino", image: "images/mercurial-world.jpeg" },
-  { name: "Hysterical Us", image: "images/mercurial-world.jpeg" },
-  { name: "Dreamcatching", image: "images/mercurial-world.jpeg" },
-  { name: "Dawning of the Season", image: "images/mercurial-world.jpeg" },
-  { name: "Follow the Leader", image: "images/mercurial-world.jpeg" },
-  { name: "Halfway", image: "images/mercurial-world.jpeg" },
-  { name: "The Beginning", image: "images/mercurial-world.jpeg" },
-  { name: "Mercurial World", image: "images/mercurial-world.jpeg" },
-  { name: "Something for 2", image: "images/mercurial-world.jpeg" },
-  { name: "Prophecy", image: "images/mercurial-world.jpeg" },
-  { name: "The End", image: "images/mercurial-world.jpeg" },
-
-  // Mercurial World (Deluxe)
-  { name: "Unconditional", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "All You Do", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secret 1", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secrets 2-9: medley", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secret 10", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secret 11", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secret 12", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secret 13", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secret 14", image: "images/mercurial-world-deluxe.jpeg" },
-  { name: "secret 15", image: "images/mercurial-world-deluxe.jpeg" },
-
-  // mini mix, vol. 3
-  { name: "Top Dog", image: "images/mini-mix-vol-3.jpeg" },
-  { name: "EXO", image: "images/mini-mix-vol-3.jpeg" },
-  { name: "2 Wheel Drive", image: "images/mini-mix-vol-3.jpeg" },
-  { name: "Wandering Eyes", image: "images/mini-mix-vol-3.jpeg" },
-  { name: "Slug Song (Reprise)", image: "images/mini-mix-vol-3.jpeg" },
-  { name: "Slug Song", image: "images/mini-mix-vol-3.jpeg" },
-  { name: "Tonguetwister", image: "images/mini-mix-vol-3.jpeg" },
-
-  // Imaginal Disk
-  { name: "Angel on a Satellite", image: "images/imaginal-disk.jpeg" },
-  { name: "Fear, Sex", image: "images/imaginal-disk.jpeg" },
-  { name: "The Ballad of Matt & Mica", image: "images/imaginal-disk.jpeg" },
-  { name: "Watching T.V.", image: "images/imaginal-disk.jpeg" },
-  { name: "Cry for Me", image: "images/imaginal-disk.jpeg" },
-  { name: "Killing Time", image: "images/imaginal-disk.jpeg" },
-  { name: "She Looked Like Me!", image: "images/imaginal-disk.jpeg" },
-  { name: "That’s My Floor", image: "images/imaginal-disk.jpeg" },
-  { name: "Love is Everywhere", image: "images/imaginal-disk.jpeg" },
-  { name: "Vampire in the Corner", image: "images/imaginal-disk.jpeg" },
-  { name: "Feeling DiskInserted?", image: "images/imaginal-disk.jpeg" },
-  { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
-];
 
 <script>
 const songs = [
@@ -263,10 +147,10 @@ const songs = [
   { name: "Paint Me a Picture", image: "images/human-happens-paint-me-a-picture.jpeg" }
 ];
 
-// --- Shuffle songs ---
+// Shuffle songs
 songs.sort(() => Math.random() - 0.5);
 
-// --- Merge Sort Tournament Logic ---
+// Tournament state
 let lists = songs.map(s => [s]);
 let currentMergeQueue = [];
 let currentMerge = null;
@@ -274,20 +158,20 @@ let head1 = 0, head2 = 0;
 let rec = [];
 let numQuestion = 1;
 
-// --- Progress tracking ---
-let totalComparisons = Math.pow(songs.length, 2) / 2; // rough estimate
+// Progress
+let totalComparisons = Math.pow(songs.length,2)/2;
 let comparisonsLeft = totalComparisons;
 
 // --- Update progress bar ---
 function updateProgress() {
   const bar = document.getElementById("progressBar");
   const percentText = document.getElementById("progressPercent");
-  const percent = Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100);
+  const percent = Math.floor(((totalComparisons - comparisonsLeft)/totalComparisons)*100);
   bar.style.width = percent + "%";
   percentText.textContent = percent + "%";
 }
 
-// --- Show current battle ---
+// --- Show images ---
 function showImage() {
   if (!currentMerge) return;
   document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
@@ -297,20 +181,18 @@ function showImage() {
   document.getElementById("rightName").textContent = currentMerge.right[head2].name;
 }
 
-// --- Choose a song ---
+// --- Choose song ---
 function choose(side) {
   if (!currentMerge) return;
 
-  rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
+  rec.push(side==="left"?currentMerge.left[head1++]:currentMerge.right[head2++]);
   numQuestion++;
   comparisonsLeft--;
 
-  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
-    rec.push(currentMerge.left[head1++]);
-  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
-    rec.push(currentMerge.right[head2++]);
+  while(head1<currentMerge.left.length && head2===currentMerge.right.length) rec.push(currentMerge.left[head1++]);
+  while(head2<currentMerge.right.length && head1===currentMerge.left.length) rec.push(currentMerge.right[head2++]);
 
-  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
+  if(head1===currentMerge.left.length && head2===currentMerge.right.length){
     currentMerge.merged.push(...rec);
     rec = [];
     prepareNextMerge();
@@ -319,32 +201,31 @@ function choose(side) {
   }
 
   updateProgress();
-  if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
+  if(comparisonsLeft<=0) document.removeEventListener("keydown", keyListener);
 }
 
-// --- Prepare next merge ---
-function prepareNextMerge() {
-  if (currentMergeQueue.length > 0) {
+// --- Next merge ---
+function prepareNextMerge(){
+  if(currentMergeQueue.length>0){
     currentMerge = currentMergeQueue.shift();
-    head1 = 0;
-    head2 = 0;
+    head1=0; head2=0;
     showImage();
   } else {
     prepareNextRound();
   }
 }
 
-// --- Prepare next round ---
-function prepareNextRound() {
+// --- Next round ---
+function prepareNextRound(){
   let newLists = [];
   currentMergeQueue = [];
 
-  while (lists.length > 0) {
+  while(lists.length>0){
     const left = lists.shift();
     const right = lists.shift();
     const merged = [];
-    if (right) {
-      currentMergeQueue.push({ left, right, merged });
+    if(right){
+      currentMergeQueue.push({left,right,merged});
       newLists.push(merged);
     } else {
       newLists.push(left);
@@ -353,11 +234,9 @@ function prepareNextRound() {
 
   lists = newLists;
 
-  if (currentMergeQueue.length > 0) {
+  if(currentMergeQueue.length>0){
     currentMerge = currentMergeQueue.shift();
-    head1 = 0;
-    head2 = 0;
-    rec = [];
+    head1=0; head2=0; rec=[];
     showImage();
   } else {
     showResult();
@@ -365,27 +244,29 @@ function prepareNextRound() {
 }
 
 // --- Show final ranking ---
-function showResult() {
+function showResult(){
   document.getElementById("choices").style.display = "none";
   const resultDiv = document.getElementById("result");
   resultDiv.style.display = "block";
   const rankingList = document.getElementById("ranking");
-  lists[0].forEach(song => {
+  lists[0].forEach(song=>{
     const li = document.createElement("li");
     li.textContent = song.name;
     rankingList.appendChild(li);
   });
 }
 
-// --- Keyboard controls ---
-function keyListener(event) {
-  if (comparisonsLeft <= 0) return;
-  if (event.key === "ArrowLeft") choose("left");
-  if (event.key === "ArrowRight") choose("right");
+// --- Keyboard listener ---
+function keyListener(e){
+  if(comparisonsLeft<=0) return;
+  if(e.key==="ArrowLeft") choose("left");
+  if(e.key==="ArrowRight") choose("right");
 }
 document.addEventListener("keydown", keyListener);
 
-// --- Start tournament ---
+// Start tournament
 prepareNextRound();
 updateProgress();
 </script>
+
+</html>
