@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Magdalena Bay Song Tournament</title>
+
 <style>
+  /* Reset + base setup */
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     background-color: #f3f4f6;
     margin: 0;
@@ -18,28 +24,50 @@
     font-size: 20px;
   }
 
-  h1 { margin-bottom: 20px; }
+  h1 {
+    margin-bottom: 20px;
+    text-align: center;
+  }
 
-  #battleNumber { font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
-  <div id="progressContainer">
-  <div id="progressBar"></div>
-</div>
+  #battleNumber {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+  }
 
+  /* Progress bar */
+  #progressContainer {
+    width: 80%;
+    background-color: #ddd;
+    border-radius: 8px;
+    height: 20px;
+    margin-bottom: 25px;
+    overflow: hidden;
+  }
 
+  #progressBar {
+    width: 0%;
+    height: 100%;
+    background-color: #4caf50;
+    transition: width 0.3s ease;
+  }
+
+  /* Song choices container */
   #choices {
     display: flex;
     justify-content: center;
     gap: 30px;
-    flex-wrap: nowrap;
-    border: 1px solid red; /* for debugging */
-    overflow-x: auto;    /* scroll if too narrow */
+    flex-wrap: nowrap;       /* keep side by side */
+    overflow-x: auto;        /* allow scroll if needed */
+    margin-bottom: 20px;
   }
 
   .song-card {
     background-color: #fff;
     border: 3px solid #ccc;
     border-radius: 10px;
-    width: 45vw; /* 45% of viewport width, adjusts automatically */
+    width: 45vw;             /* each takes about half screen */
     max-width: 360px;
     display: flex;
     flex-direction: column;
@@ -48,8 +76,12 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     cursor: pointer;
     transition: transform 0.1s;
+    flex-shrink: 0;          /* prevents shrinking when scrolling */
   }
-  .song-card:hover { transform: scale(1.03); }
+
+  .song-card:hover {
+    transform: scale(1.03);
+  }
 
   .song-card img {
     width: 100%;
@@ -72,13 +104,22 @@
     display: none;
   }
 
-  #ranking { margin-top: 10px; text-align: left; display: inline-block; }
+  #ranking {
+    margin-top: 10px;
+    text-align: left;
+    display: inline-block;
+  }
 </style>
 </head>
 <body>
 
 <h1>Magdalena Bay Song Tournament</h1>
 <div id="battleNumber">Battle 1</div>
+
+<!-- ✅ Moved here — no HTML inside <style> -->
+<div id="progressContainer">
+  <div id="progressBar"></div>
+</div>
 
 <div id="choices">
   <div id="left" class="song-card" onclick="choose('left')">
