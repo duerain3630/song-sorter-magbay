@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: flex-start;
     min-height: 100vh;
-    padding: 20px;
+    padding: 10px;
     font-size: 20px;
   }
 
@@ -30,7 +30,9 @@
     display: flex;
     justify-content: center;
     gap: 30px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    border: 1px solid red; /* for debugging */
+    overflow-x: auto;    /* scroll if too narrow */
   }
 
   .song-card {
