@@ -254,129 +254,138 @@ const songs = [
 ];
 
 <script>
-  // --- Shuffle songs ---
-  songs.sort(() => Math.random() - 0.5);
+const songs = [
+  { name: "Death & Romance", image: "images/death-romance.jpeg" },
+  { name: "Tunnel Vision", image: "images/tunnel-vision.jpeg" },
+  { name: "Second Sleep", image: "images/second-sleep-star-eyes.jpeg" },
+  { name: "Star Eyes", image: "images/second-sleep-star-eyes.jpeg" },
+  { name: "Human Happens", image: "images/human-happens-paint-me-a-picture.jpeg" },
+  { name: "Paint Me a Picture", image: "images/human-happens-paint-me-a-picture.jpeg" }
+];
 
-  // --- Merge Sort Tournament Logic ---
-  let lists = songs.map(s => [s]);
-  let currentMergeQueue = [];
-  let currentMerge = null;
-  let head1 = 0, head2 = 0;
-  let rec = [];
-  let numQuestion = 1;
+// --- Shuffle songs ---
+songs.sort(() => Math.random() - 0.5);
 
-  // --- Progress tracking ---
-  let totalComparisons = Math.pow(songs.length, 2) / 2; // rough estimate
-  let comparisonsLeft = totalComparisons;
+// --- Merge Sort Tournament Logic ---
+let lists = songs.map(s => [s]);
+let currentMergeQueue = [];
+let currentMerge = null;
+let head1 = 0, head2 = 0;
+let rec = [];
+let numQuestion = 1;
 
-  // --- Update progress bar ---
-  function updateProgress() {
-    const bar = document.getElementById("progressBar");
-    const percentText = document.getElementById("progressPercent");
-    const percent = Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100);
-    bar.style.width = percent + "%";
-    percentText.textContent = percent + "%";
+// --- Progress tracking ---
+let totalComparisons = Math.pow(songs.length, 2) / 2; // rough estimate
+let comparisonsLeft = totalComparisons;
+
+// --- Update progress bar ---
+function updateProgress() {
+  const bar = document.getElementById("progressBar");
+  const percentText = document.getElementById("progressPercent");
+  const percent = Math.floor(((totalComparisons - comparisonsLeft) / totalComparisons) * 100);
+  bar.style.width = percent + "%";
+  percentText.textContent = percent + "%";
+}
+
+// --- Show current battle ---
+function showImage() {
+  if (!currentMerge) return;
+  document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
+  document.getElementById("leftImg").src = currentMerge.left[head1].image;
+  document.getElementById("leftName").textContent = currentMerge.left[head1].name;
+  document.getElementById("rightImg").src = currentMerge.right[head2].image;
+  document.getElementById("rightName").textContent = currentMerge.right[head2].name;
+}
+
+// --- Choose a song ---
+function choose(side) {
+  if (!currentMerge) return;
+
+  rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
+  numQuestion++;
+  comparisonsLeft--;
+
+  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
+    rec.push(currentMerge.left[head1++]);
+  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
+    rec.push(currentMerge.right[head2++]);
+
+  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
+    currentMerge.merged.push(...rec);
+    rec = [];
+    prepareNextMerge();
+  } else {
+    showImage();
   }
 
-  // --- Show current battle ---
-  function showImage() {
-    if (!currentMerge) return;
-    document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
-    document.getElementById("leftImg").src = currentMerge.left[head1].image;
-    document.getElementById("leftName").textContent = currentMerge.left[head1].name;
-    document.getElementById("rightImg").src = currentMerge.right[head2].image;
-    document.getElementById("rightName").textContent = currentMerge.right[head2].name;
-  }
-
-  // --- Choose a song ---
-  function choose(side) {
-    if (!currentMerge) return;
-
-    rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
-    numQuestion++;
-    comparisonsLeft--;
-
-    while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
-      rec.push(currentMerge.left[head1++]);
-    while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
-      rec.push(currentMerge.right[head2++]);
-
-    if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
-      currentMerge.merged.push(...rec);
-      rec = [];
-      prepareNextMerge();
-    } else {
-      showImage();
-    }
-
-    updateProgress();
-    if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
-  }
-
-  // --- Prepare next merge ---
-  function prepareNextMerge() {
-    if (currentMergeQueue.length > 0) {
-      currentMerge = currentMergeQueue.shift();
-      head1 = 0;
-      head2 = 0;
-      showImage();
-    } else {
-      prepareNextRound();
-    }
-  }
-
-  // --- Prepare next round ---
-  function prepareNextRound() {
-    let newLists = [];
-    currentMergeQueue = [];
-
-    while (lists.length > 0) {
-      const left = lists.shift();
-      const right = lists.shift();
-      const merged = [];
-      if (right) {
-        currentMergeQueue.push({ left, right, merged });
-        newLists.push(merged);
-      } else {
-        newLists.push(left);
-      }
-    }
-
-    lists = newLists;
-
-    if (currentMergeQueue.length > 0) {
-      currentMerge = currentMergeQueue.shift();
-      head1 = 0;
-      head2 = 0;
-      rec = [];
-      showImage();
-    } else {
-      showResult();
-    }
-  }
-
-  // --- Show final ranking ---
-  function showResult() {
-    document.getElementById("choices").style.display = "none";
-    const resultDiv = document.getElementById("result");
-    resultDiv.style.display = "block";
-    const rankingList = document.getElementById("ranking");
-    lists[0].forEach(song => {
-      const li = document.createElement("li");
-      li.textContent = song.name;
-      rankingList.appendChild(li);
-    });
-  }
-
-  // --- Keyboard controls ---
-  function keyListener(event) {
-    if (comparisonsLeft <= 0) return;
-    if (event.key === "ArrowLeft") choose("left");
-    if (event.key === "ArrowRight") choose("right");
-  }
-  document.addEventListener("keydown", keyListener);
-
-  // --- Start tournament ---
-  prepareNextRound();
   updateProgress();
+  if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
+}
+
+// --- Prepare next merge ---
+function prepareNextMerge() {
+  if (currentMergeQueue.length > 0) {
+    currentMerge = currentMergeQueue.shift();
+    head1 = 0;
+    head2 = 0;
+    showImage();
+  } else {
+    prepareNextRound();
+  }
+}
+
+// --- Prepare next round ---
+function prepareNextRound() {
+  let newLists = [];
+  currentMergeQueue = [];
+
+  while (lists.length > 0) {
+    const left = lists.shift();
+    const right = lists.shift();
+    const merged = [];
+    if (right) {
+      currentMergeQueue.push({ left, right, merged });
+      newLists.push(merged);
+    } else {
+      newLists.push(left);
+    }
+  }
+
+  lists = newLists;
+
+  if (currentMergeQueue.length > 0) {
+    currentMerge = currentMergeQueue.shift();
+    head1 = 0;
+    head2 = 0;
+    rec = [];
+    showImage();
+  } else {
+    showResult();
+  }
+}
+
+// --- Show final ranking ---
+function showResult() {
+  document.getElementById("choices").style.display = "none";
+  const resultDiv = document.getElementById("result");
+  resultDiv.style.display = "block";
+  const rankingList = document.getElementById("ranking");
+  lists[0].forEach(song => {
+    const li = document.createElement("li");
+    li.textContent = song.name;
+    rankingList.appendChild(li);
+  });
+}
+
+// --- Keyboard controls ---
+function keyListener(event) {
+  if (comparisonsLeft <= 0) return;
+  if (event.key === "ArrowLeft") choose("left");
+  if (event.key === "ArrowRight") choose("right");
+}
+document.addEventListener("keydown", keyListener);
+
+// --- Start tournament ---
+prepareNextRound();
+updateProgress();
 </script>
