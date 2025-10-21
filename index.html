@@ -67,44 +67,40 @@
   align-items: center;
   justify-content: center;
 }
+  
+#choices {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: nowrap;
+  margin-top: 20px;
+}
 
-  /* Song choices container */
-  #choices {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    flex-wrap: nowrap;       /* keep side by side */
-    overflow-x: auto;        /* allow scroll if needed */
-    margin-bottom: 20px;
-  }
+.song-card {
+  background-color: #fff;
+  border: 3px solid #ccc;
+  border-radius: 10px;
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.song-card:hover {
+  transform: scale(1.03);
+}
 
-  .song-card {
-    background-color: #fff;
-    border: 3px solid #ccc;
-    border-radius: 10px;
-    width: 45vw;             /* each takes about half screen */
-    max-width: 360px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: transform 0.1s;
-    flex-shrink: 0;          /* prevents shrinking when scrolling */
-  }
-
-  .song-card:hover {
-    transform: scale(1.03);
-  }
-
-  .song-card img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 12px;
-  }
+.song-card img {
+  width: 340px;
+  height: 340px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
 
   .song-card p {
     font-size: 1.1rem;
@@ -131,12 +127,13 @@
 <h1>Magdalena Bay Song Tournament</h1>
 <div id="battleNumber">Battle 1</div>
 
-<!-- ✅ Progress bar goes here (HTML, not CSS) -->
+<!-- ✅ Progress bar -->
 <div id="progressContainer" style="width: 80%; max-width: 600px; background: #ddd; border-radius: 8px; height: 25px; position: relative; margin-bottom: 20px;">
   <div id="progressBar" style="background: #4caf50; height: 100%; width: 0%; border-radius: 8px;"></div>
   <div id="progressPercent" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; line-height: 25px; font-weight: bold; color: #fff;">0%</div>
 </div>
 
+<!-- ✅ Song choices -->
 <div id="choices">
   <div id="left" class="song-card" onclick="choose('left')">
     <img id="leftImg" src="" alt="">
@@ -148,10 +145,12 @@
   </div>
 </div>
 
+<!-- ✅ Final result section -->
 <div id="result">
   <h2>Final Ranking</h2>
   <ol id="ranking"></ol>
 </div>
+
 
 <script>
 const songs = [
