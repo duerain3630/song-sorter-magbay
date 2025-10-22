@@ -242,41 +242,23 @@ const songs = [
 
 songs.sort(() => Math.random() - 0.5); // Shuffle songs
 
-// --- Helper: count total comparisons in merge sort ---
-function countComparisons(list) {
-  if (list.length <= 1) return 0;
-  const mid = Math.floor(list.length / 2);
-  const left = list.slice(0, mid);
-  const right = list.slice(mid);
-  return (
-    countComparisons(left) +
-    countComparisons(right) +
-    list.length // approximate comparisons per merge
-  );
+// --- Progress bar setup ---
+function estimateTotalComparisons(n) {
+  if (n <= 1) return 0;
+  const mid = Math.floor(n / 2);
+  return estimateTotalComparisons(mid) + estimateTotalComparisons(n - mid) + n - 1;
 }
 
-// --- Initialize core variables ---
-let lists = songs.map(s => [s]);
-let currentMergeQueue = [];
-let currentMerge = null;
-let head1 = 0,
-  head2 = 0;
-let rec = [];
-let numQuestion = 1;
+let totalComparisons = estimateTotalComparisons(songs.length);
+let numQuestion = 0;
 
-// --- Accurate progress tracking ---
-let totalComparisons = countComparisons(songs);
-let comparisonsLeft = totalComparisons;
-
-// --- Update progress bar ---
 function updateProgress() {
-  const bar = document.getElementById("progressBar");
-  const percentText = document.getElementById("progressPercent");
-  const percent = Math.floor(
-    ((totalComparisons - comparisonsLeft) / totalComparisons) * 100
-  );
-  bar.style.width = percent + "%";
-  percentText.textContent = percent + "%";
+  const progress = Math.min((numQuestion / totalComparisons) * 100, 100);
+  const progressBar = document.getElementById("progress-bar");
+  if (progressBar) {
+    progressBar.style.width = progress + "%";
+    progressBar.textContent = Math.floor(progress) + "%";
+  }
 }
 
 // --- Show current battle ---
@@ -296,6 +278,7 @@ function choose(side) {
   rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
   numQuestion++;
   comparisonsLeft--;
+  updateProgress();
 
   while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
     rec.push(currentMerge.left[head1++]);
