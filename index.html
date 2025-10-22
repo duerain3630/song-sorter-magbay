@@ -240,64 +240,89 @@ const songs = [
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
 ];
 
-songs.sort(() => Math.random() - 0.5); // Shuffle songs
+/* Shuffle songs */
+songs.sort(() => Math.random() - 0.5);
 
-// --- Progress bar setup ---
+/* --- Helper: estimate exact comparisons for merge-sort style merging --- */
 function estimateTotalComparisons(n) {
   if (n <= 1) return 0;
   const mid = Math.floor(n / 2);
-  return estimateTotalComparisons(mid) + estimateTotalComparisons(n - mid) + n - 1;
+  return (
+    estimateTotalComparisons(mid) +
+    estimateTotalComparisons(n - mid) +
+    (n - 1) // merging two parts of total length n requires at most n-1 comparisons
+  );
 }
 
-let totalComparisons = estimateTotalComparisons(songs.length);
-let numQuestion = 0;
+/* --- Tournament state --- */
+let lists = songs.map(s => [s]);
+let currentMergeQueue = [];
+let currentMerge = null;
+let head1 = 0, head2 = 0;
+let rec = [];
 
+/* battle counter shown in UI is comparisonsDone + 1 */
+let comparisonsDone = 0;
+const totalComparisons = estimateTotalComparisons(songs.length);
+
+/* --- Progress update --- */
 function updateProgress() {
-  const progress = Math.min((numQuestion / totalComparisons) * 100, 100);
-  const progressBar = document.getElementById("progress-bar");
-  if (progressBar) {
-    progressBar.style.width = progress + "%";
-    progressBar.textContent = Math.floor(progress) + "%";
-  }
+  const bar = document.getElementById("progressBar");
+  const percentText = document.getElementById("progressPercent");
+  if (!bar || !percentText) return;
+  // handle edge case when totalComparisons is 0
+  const pct = totalComparisons === 0 ? 100 : Math.floor((comparisonsDone / totalComparisons) * 100);
+  bar.style.width = Math.min(100, pct) + "%";
+  percentText.textContent = Math.min(100, pct) + "%";
 }
 
-// --- Show current battle ---
+/* --- Show current pair (images + names) --- */
 function showImage() {
   if (!currentMerge) return;
-  document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
+  // battle number: show next comparison index (1-based)
+  document.getElementById("battleNumber").textContent = `Battle ${comparisonsDone + 1}`;
   document.getElementById("leftImg").src = currentMerge.left[head1].image;
   document.getElementById("leftName").textContent = currentMerge.left[head1].name;
   document.getElementById("rightImg").src = currentMerge.right[head2].image;
   document.getElementById("rightName").textContent = currentMerge.right[head2].name;
 }
 
-// --- Choose a song ---
+/* --- When a user chooses left or right --- */
 function choose(side) {
   if (!currentMerge) return;
 
+  // record the chosen item (this is a user-driven comparison)
   rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
-  numQuestion++;
-  comparisonsLeft--;
+
+  // update comparison counters
+  comparisonsDone++;
   updateProgress();
 
-  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
+  // if the other side is already exhausted, push the remainder (no extra comparisons)
+  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length) {
     rec.push(currentMerge.left[head1++]);
-  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
+  }
+  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length) {
     rec.push(currentMerge.right[head2++]);
+  }
 
+  // if both heads reached ends, finalize merged array
   if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
     currentMerge.merged.push(...rec);
     rec = [];
     prepareNextMerge();
   } else {
+    // there are still items to compare in this merge
     showImage();
   }
 
-  updateProgress();
-  if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
+  // stop listening for keys when finished
+  if (comparisonsDone >= totalComparisons) {
+    document.removeEventListener("keydown", keyListener);
+  }
 }
 
-// --- Prepare next merge ---
+/* --- Move to next merge or round --- */
 function prepareNextMerge() {
   if (currentMergeQueue.length > 0) {
     currentMerge = currentMergeQueue.shift();
@@ -309,7 +334,7 @@ function prepareNextMerge() {
   }
 }
 
-// --- Prepare next round ---
+/* --- Build next round's merge queue from lists --- */
 function prepareNextRound() {
   let newLists = [];
   currentMergeQueue = [];
@@ -330,37 +355,46 @@ function prepareNextRound() {
 
   if (currentMergeQueue.length > 0) {
     currentMerge = currentMergeQueue.shift();
-    head1 = 0;
-    head2 = 0;
-    rec = [];
-    showImage();
+    head1 = 0; head2 = 0; rec = [];
+    // if currentMerge.left or right are empty (shouldn't happen), guard:
+    if (currentMerge.left.length === 0 && currentMerge.right.length === 0) {
+      prepareNextMerge();
+    } else {
+      showImage();
+    }
   } else {
     showResult();
   }
 }
 
-// --- Show final ranking ---
+/* --- Show final ranking --- */
 function showResult() {
   document.getElementById("choices").style.display = "none";
   const resultDiv = document.getElementById("result");
   resultDiv.style.display = "block";
   const rankingList = document.getElementById("ranking");
-  lists[0].forEach(song => {
+  rankingList.innerHTML = ""; // clear previous if any
+  // lists[0] should be the final merged array
+  (lists[0] || []).forEach(song => {
     const li = document.createElement("li");
     li.textContent = song.name;
     rankingList.appendChild(li);
   });
+  // ensure progress shows 100%
+  comparisonsDone = totalComparisons;
+  updateProgress();
 }
 
-// --- Keyboard controls ---
-function keyListener(event) {
-  if (comparisonsLeft <= 0) return;
-  if (event.key === "ArrowLeft") choose("left");
-  if (event.key === "ArrowRight") choose("right");
+/* --- Keyboard listener --- */
+function keyListener(e) {
+  if (comparisonsDone >= totalComparisons) return;
+  if (e.key === "ArrowLeft") choose("left");
+  if (e.key === "ArrowRight") choose("right");
 }
 document.addEventListener("keydown", keyListener);
 
-// --- Start tournament ---
+/* --- Initialize & start --- */
+lists = songs.map(s => [s]); // re-init lists (safe)
 prepareNextRound();
 updateProgress();
 </script>
