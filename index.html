@@ -240,31 +240,46 @@ const songs = [
   { name: "True Blue Interlude", image: "images/imaginal-disk.jpeg" }
 ];
 
-// Shuffle songs
-songs.sort(() => Math.random() - 0.5);
+songs.sort(() => Math.random() - 0.5); // Shuffle songs
 
-// Tournament state
+// --- Helper: count total comparisons in merge sort ---
+function countComparisons(list) {
+  if (list.length <= 1) return 0;
+  const mid = Math.floor(list.length / 2);
+  const left = list.slice(0, mid);
+  const right = list.slice(mid);
+  return (
+    countComparisons(left) +
+    countComparisons(right) +
+    list.length // approximate comparisons per merge
+  );
+}
+
+// --- Initialize core variables ---
 let lists = songs.map(s => [s]);
 let currentMergeQueue = [];
 let currentMerge = null;
-let head1 = 0, head2 = 0;
+let head1 = 0,
+  head2 = 0;
 let rec = [];
 let numQuestion = 1;
 
-// Progress
-let totalComparisons = Math.pow(songs.length,2)/2;
+// --- Accurate progress tracking ---
+let totalComparisons = countComparisons(songs);
 let comparisonsLeft = totalComparisons;
 
 // --- Update progress bar ---
 function updateProgress() {
   const bar = document.getElementById("progressBar");
   const percentText = document.getElementById("progressPercent");
-  const percent = Math.floor(((totalComparisons - comparisonsLeft)/totalComparisons)*100);
+  const percent = Math.floor(
+    ((totalComparisons - comparisonsLeft) / totalComparisons) * 100
+  );
   bar.style.width = percent + "%";
   percentText.textContent = percent + "%";
 }
 
-// --- Show images ---
+// --- Show current battle ---
 function showImage() {
   if (!currentMerge) return;
   document.getElementById("battleNumber").textContent = `Battle ${numQuestion}`;
@@ -274,18 +289,20 @@ function showImage() {
   document.getElementById("rightName").textContent = currentMerge.right[head2].name;
 }
 
-// --- Choose song ---
+// --- Choose a song ---
 function choose(side) {
   if (!currentMerge) return;
 
-  rec.push(side==="left"?currentMerge.left[head1++]:currentMerge.right[head2++]);
+  rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
   numQuestion++;
   comparisonsLeft--;
 
-  while(head1<currentMerge.left.length && head2===currentMerge.right.length) rec.push(currentMerge.left[head1++]);
-  while(head2<currentMerge.right.length && head1===currentMerge.left.length) rec.push(currentMerge.right[head2++]);
+  while (head1 < currentMerge.left.length && head2 === currentMerge.right.length)
+    rec.push(currentMerge.left[head1++]);
+  while (head2 < currentMerge.right.length && head1 === currentMerge.left.length)
+    rec.push(currentMerge.right[head2++]);
 
-  if(head1===currentMerge.left.length && head2===currentMerge.right.length){
+  if (head1 === currentMerge.left.length && head2 === currentMerge.right.length) {
     currentMerge.merged.push(...rec);
     rec = [];
     prepareNextMerge();
@@ -294,31 +311,32 @@ function choose(side) {
   }
 
   updateProgress();
-  if(comparisonsLeft<=0) document.removeEventListener("keydown", keyListener);
+  if (comparisonsLeft <= 0) document.removeEventListener("keydown", keyListener);
 }
 
-// --- Next merge ---
-function prepareNextMerge(){
-  if(currentMergeQueue.length>0){
+// --- Prepare next merge ---
+function prepareNextMerge() {
+  if (currentMergeQueue.length > 0) {
     currentMerge = currentMergeQueue.shift();
-    head1=0; head2=0;
+    head1 = 0;
+    head2 = 0;
     showImage();
   } else {
     prepareNextRound();
   }
 }
 
-// --- Next round ---
-function prepareNextRound(){
+// --- Prepare next round ---
+function prepareNextRound() {
   let newLists = [];
   currentMergeQueue = [];
 
-  while(lists.length>0){
+  while (lists.length > 0) {
     const left = lists.shift();
     const right = lists.shift();
     const merged = [];
-    if(right){
-      currentMergeQueue.push({left,right,merged});
+    if (right) {
+      currentMergeQueue.push({ left, right, merged });
       newLists.push(merged);
     } else {
       newLists.push(left);
@@ -327,9 +345,11 @@ function prepareNextRound(){
 
   lists = newLists;
 
-  if(currentMergeQueue.length>0){
+  if (currentMergeQueue.length > 0) {
     currentMerge = currentMergeQueue.shift();
-    head1=0; head2=0; rec=[];
+    head1 = 0;
+    head2 = 0;
+    rec = [];
     showImage();
   } else {
     showResult();
@@ -337,27 +357,27 @@ function prepareNextRound(){
 }
 
 // --- Show final ranking ---
-function showResult(){
+function showResult() {
   document.getElementById("choices").style.display = "none";
   const resultDiv = document.getElementById("result");
   resultDiv.style.display = "block";
   const rankingList = document.getElementById("ranking");
-  lists[0].forEach(song=>{
+  lists[0].forEach(song => {
     const li = document.createElement("li");
     li.textContent = song.name;
     rankingList.appendChild(li);
   });
 }
 
-// --- Keyboard listener ---
-function keyListener(e){
-  if(comparisonsLeft<=0) return;
-  if(e.key==="ArrowLeft") choose("left");
-  if(e.key==="ArrowRight") choose("right");
+// --- Keyboard controls ---
+function keyListener(event) {
+  if (comparisonsLeft <= 0) return;
+  if (event.key === "ArrowLeft") choose("left");
+  if (event.key === "ArrowRight") choose("right");
 }
 document.addEventListener("keydown", keyListener);
 
-// Start tournament
+// --- Start tournament ---
 prepareNextRound();
 updateProgress();
 </script>
