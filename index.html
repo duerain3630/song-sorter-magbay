@@ -111,10 +111,20 @@
     text-align: left;
     display: inline-block;
   }
+
+  #titleLogo {
+  max-width: 300px; /* adjust size */
+  width: 60%;       /* responsive scaling */
+  height: auto;
+  display: block;
+  margin: 0 auto 20px auto; /* center horizontally and space below */
+}
 </style>
 </head>
 <body>
-  <h1>Magdalena Bay Song Tournament</h1>
+  <h1>
+    <img src="images/magdalena-bay-logo.png" alt="Magdalena Bay Logo" id="titleLogo">
+  </h1>
   <div id="battleNumber">Battle 1</div>
 
   <div id="progress-container">
