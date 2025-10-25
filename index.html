@@ -100,20 +100,6 @@
     margin: 0;
   }
 
-  #undoButton {
-  margin-top: 15px;
-  background-color: #444;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-#undoButton:hover {
-  background-color: #666;
-}
-
   #result {
     margin-top: 30px;
     text-align: center;
@@ -155,8 +141,6 @@
       <p id="rightName"></p>
     </div>
   </div>
-
-  <button id="undoButton" onclick="undoLastBattle()" style="margin-top: 12px;">Undo Last Battle</button>
 
   <div id="result">
     <h2>Final Ranking</h2>
@@ -286,7 +270,6 @@ let currentMergeQueue = [];
 let currentMerge = null;
 let head1 = 0, head2 = 0;
 let rec = [];
-let undoStack = [];
 
 /* battle counter shown in UI is comparisonsDone + 1 */
 let comparisonsDone = 0;
@@ -314,42 +297,9 @@ function showImage() {
   document.getElementById("rightName").textContent = currentMerge.right[head2].name;
 }
 
-function undoLastBattle() {
-  if (undoStack.length === 0) {
-    alert("No previous battle to undo!");
-    return;
-  }
-
-  // Pop the previous state from stack
-  const prevState = undoStack.pop();
-
-  // Restore essential merge state
-  currentMerge = JSON.parse(JSON.stringify(prevState.currentMerge));
-  currentMergeQueue = JSON.parse(JSON.stringify(prevState.currentMergeQueue));
-
-  // Reset heads & comparison count back one step
-  head1 = prevState.head1;
-  head2 = prevState.head2;
-  rec = JSON.parse(JSON.stringify(prevState.rec));
-  comparisonsDone = Math.max(0, comparisonsDone - 1);
-
-  // Redraw the current battle
-  showImage();
-  updateProgress();
-}
-
 /* --- When a user chooses left or right --- */
 function choose(side) {
   if (!currentMerge) return;
-
-  // Save full snapshot before changing anything
-  undoStack.push({
-  currentMerge: JSON.parse(JSON.stringify(currentMerge)),
-  currentMergeQueue: JSON.parse(JSON.stringify(currentMergeQueue)),
-  head1,
-  head2,
-  rec: JSON.parse(JSON.stringify(rec))
-});
 
   // record the chosen item (this is a user-driven comparison)
   rec.push(side === "left" ? currentMerge.left[head1++] : currentMerge.right[head2++]);
