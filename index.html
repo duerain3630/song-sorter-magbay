@@ -100,7 +100,20 @@
     margin: 0;
   }
 
-  .result-item {
+#result {
+  display: none; /* hide the final ranking section until results are shown */
+  text-align: center;
+  margin-top: 40px;
+}
+
+#ranking {
+  list-style: decimal;  /* ensures numbers appear */
+  padding-left: 40px;   /* indentation for the list */
+  text-align: left;     /* keep numbers aligned */
+  display: inline-block; /* center the list as a block */
+}
+
+.result-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -111,9 +124,8 @@
   width: 40px;
   height: 40px;
   object-fit: cover;
-  border-radius: 6px; /* use 50% for circles */
+  border-radius: 6px;
 }
-
 
   #titleLogo {
   max-width: 400px; /* adjust size */
@@ -122,6 +134,7 @@
   display: block;
   margin: 0 auto 24px auto; /* center horizontally and space below */
 }
+  
 </style>
 </head>
 <body>
