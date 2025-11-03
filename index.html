@@ -120,6 +120,11 @@
   margin-bottom: 8px;
 }
 
+.result-item span:first-child {
+  width: 25px; /* keeps numbers aligned */
+  text-align: right;
+}
+
 .result-image {
   width: 40px;
   height: 40px;
@@ -403,27 +408,32 @@ function showResult() {
   resultDiv.style.display = "block";
 
   const rankingList = document.getElementById("ranking");
-  rankingList.innerHTML = ""; // clear previous if any
+  rankingList.innerHTML = ""; // clear previous results
 
-  // lists[0] should be the final merged array
-  (lists[0] || []).forEach(song => {
+  (lists[0] || []).forEach((song, index) => {
     const li = document.createElement("li");
     li.classList.add("result-item");
 
+    // number text
+    const numberSpan = document.createElement("span");
+    numberSpan.textContent = `${index + 1}.`;
+
+    // image
     const img = document.createElement("img");
     img.src = song.image;
     img.alt = song.name;
     img.classList.add("result-image");
 
-    const span = document.createElement("span");
-    span.textContent = song.name;
+    // song name
+    const text = document.createElement("span");
+    text.textContent = song.name;
 
+    li.appendChild(numberSpan);
     li.appendChild(img);
-    li.appendChild(span);
+    li.appendChild(text);
     rankingList.appendChild(li);
   });
 
-  // ensure progress shows 100%
   comparisonsDone = totalComparisons;
   updateProgress();
 }
